@@ -29,3 +29,4 @@ LANGSMITH_API_KEY='YOUR_LANGSMITH_API_KEY'
 
 **Future Works:** Personalize the final report creation agent to retrieve an in memory store object to get across-conversational context of the user which and agent could submit as a conclusion to the store, might need to create a rate_limit backend server as well and many more things if taken to production.
 Another dynamic thing that could be added is that we let a user upload a pdf of a research paper as well (by building a RAG toolnode for that) or some sources links that allows to get a broader context rather than conducting interviews (though it also uses web_search anyways which can be also extended using wikipedia api parallely). Or we could just let the RAG be uploaded as a part of the running memory using langgraph store instead?
+Might need to check for compounding increase in state_history if we let this much context in.
