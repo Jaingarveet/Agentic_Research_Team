@@ -24,3 +24,8 @@ LANGSMITH_API_KEY='YOUR_LANGSMITH_API_KEY'
  LANGSMITH_PROJECT= your_project_name
 Uncomment the following if you are on the EU instance:
  LANGSMITH_ENDPOINT=https://eu.api.smith.langchain.com
+
+
+
+
+Future Works: Personalize the final report creation agent to retrieve an in memory store object to get across-conversational context of the user which and agent could submit as a conclusion to the store, might need to create a rate_limit backend server as well and many more things if taken to production.
