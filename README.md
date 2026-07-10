@@ -30,6 +30,6 @@ LANGSMITH_API_KEY='YOUR_LANGSMITH_API_KEY'
 **Future Directions:** 
 - Personalize the final report creation agent to retrieve an in memory store object to get across-conversational context of the user which an agent could submit as a conclusion to the store
 - Let user upload a pdf of a research paper as well (by building a RAG toolnode for that) or some sources links that allows to get a broader context rather than conducting interviews (though it also uses web_search anyways which can be also extended using wikipedia api parallely).
-- Or we could just let the RAG be uploaded as a part of the running memory using langgraph store instead? (Might need to check for compounding increase in state_history if we let this much context in.)
+- Or we could just let the RAG context be uploaded as a part of the running memory using langgraph store instead? (Might need to check for compounding increase in state_history if we let this much context in.)
 - Personalities to expert (or different model APIs, I only experimented with gpt-nano-5 due to cost issues.)
 - Fixed expert without analyst creator that converses according to domain requirement
