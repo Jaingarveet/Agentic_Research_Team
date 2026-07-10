@@ -3,6 +3,7 @@ from typing import Optional, Annotated
 from langgraph.graph import MessagesState
 from operator import add
 
+
 class Analyst_schema(BaseModel):
     name: Optional[str] = Field(description= 'Name of the analyst', default = None)
     
@@ -37,8 +38,7 @@ class UserSideInput(MessagesState):
     sources_all_agents: Annotated[list,add] = Field(default_factory=[])
     intro : str = Field(description = 'Intro of the research paper draft by using all the conversation history.')
     body : str 
-    final_draft_sources: Annotated[list[str,int],add] = Field(description = """final sources that are used as references to generate the body of the 
-    research report""")
+    final_draft_sources: Annotated[list[str,int],add] = Field(description = """final sources that are used as references to generate the body of the research report""")
 
 
 class structured_input(BaseModel):
