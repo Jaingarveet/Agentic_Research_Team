@@ -1,6 +1,8 @@
 # import nodes:
 from nodes_and_edges import input_structuring_node, analyst_creator, HITL, conditional_edge_HITL, generate_and_ask_question, finish_convo, expert_search_query, web_search, answer_question, collect_interviews, create_intro, create_body_and_sources
 
+# import required states: 
+from states import UserSideInput, SingleInterviewState
 # general imports: 
 from langgraph.graph import StateGraph, START, END
 from langchain.chat_models import init_chat_model
