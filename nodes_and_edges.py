@@ -1,8 +1,9 @@
+import json
 from langgraph.types import interrupt
 from pydantic import BaseModel
 from langgraph.types import Send, Overwrite, Command
 from langchain.chat_models import init_chat_model
-from langchain.messages import SystemMessage, AIMessage
+from langchain.messages import SystemMessage, AIMessage, HumanMessage
 from tavily import TavilyClient
 from utils import check_token_usage, summarization_middleware
 from states import Analyst_schema, Analyst_collection, UserSideInput, structured_input, SingleInterviewState, Question_Structure, Answer_Structure, body_and_sources_struct
@@ -36,44 +37,76 @@ The topic for which you have to create analysts for is {topic}
     
 def analyst_creator(state: UserSideInput):
     """ Given a user input schema this function invokes a LLM to generate a list of analyst to conduct specialized interviews"""
-     # the last message will be a system message from the input or human_feedback node
-    final_system_message = [SystemMessage(content = ANALYST_CREATOR_PROMPT.format(max_analysts_number = state['max_analysts'], 
-                                                                                  topic = state['topic']))]
+     # the last message will be a system message from the input_structuring_node or human_feedback node else a human_feedback
     
-    response  = model.with_structured_output(Analyst_collection).invoke(final_system_message) 
-    
-    return {'interviewers': response,
-            'messages': [AIMessage(content = 'A list of analyst has been generated successfully!')]}
+    if isinstance(state['messages'][-1], HumanMessage):
+        
+        final_system_message = [SystemMessage(content = ANALYST_CREATOR_PROMPT.format(max_analysts_number = state['max_analysts'], 
+                                                                                      topic = state['topic'])), state['messages'][-1]]
+
+        response  = model.with_structured_output(Analyst_collection).invoke(final_system_message) 
+        
+        return {'interviewers': response,
+                'messages': [AIMessage(content = 'A list of analyst has been generated successfully!')]}
+        
+    else: 
+        
+        final_system_message = [SystemMessage(content = ANALYST_CREATOR_PROMPT.format(max_analysts_number = state['max_analysts'], 
+                                                                                      topic = state['topic']))]
+        
+        response  = model.with_structured_output(Analyst_collection).invoke(final_system_message) 
+        
+        return {'interviewers': response,
+                'messages': [AIMessage(content = 'A list of analyst has been generated successfully!')]}
 
 def HITL(state: UserSideInput):
     
     interrupt_payload = {
-        "message": "Review the generated analysts. Do you want to continue or revise?",
-        "topic": state['topic'],
-        "current_analysts": state['interviewers'],
-        "allowed_responses": ["continue", "revise"]
-    }
+                "message": "Review analysts",
+                "current_analysts": state["interviewers"],
+                "response_schema": {
+                    "action": {
+                        "type": "string",
+                        "enum": ["continue", "revise"]
+                    },
+                    "feedback": {
+                        "type": "string"
+                    }
+                }
+            }
 
-    user_response = interrupt(interrupt_payload)
-    
-    if isinstance(user_response, dict):
-        next_step = user_response.get('data',"").strip().lower()
-    
-    else: 
-        next_step = str(user_response).strip().lower()
+    response = interrupt(interrupt_payload)
 
-    if next_step not in ['continue' ,'revise']:
-        raise ValueError(f"Invalid input '{next_step}'. Expected 'continue' or 'revise'.")
+    feedback = ""
+    next_step = ""
+
+    if not isinstance(response, dict):
+        raise ValueError(
+            f"Expected interrupt() to return a dict, got {type(response).__name__}"
+        )
+
+    action = response.get("action", "").strip().lower()
+    feedback = response.get("feedback", "").strip()
+
+    if action not in {"continue", "revise"}:
+        raise ValueError(
+            f"Invalid action '{action}'. Expected 'continue' or 'revise'."
+        )
+
+
+    # if next_step not in ['continue' ,'revise']:
+    #     raise ValueError(f"Invalid input '{next_step}'. Expected 'continue' or 'revise'.")
         
     if next_step == 'continue':
         return {'messages': [SystemMessage(content = 'User feels satisfied with the list please continue to interview process.')],
                'human_feedback': False}
-
-    if next_step == 'revise':
-        return {'messages': [SystemMessage(content = 'Revision of analysts is required!.')], 
-                'human_feedback': True}
+   
+    return {'messages': [HumanMessage(content = feedback) if feedback else SystemMessage(content = 'Revision of analysts is required!.')], 
+                    'human_feedback': True}
+   
 
 def conditional_edge_HITL(state: UserSideInput):
+    
     if state['human_feedback']:
         return 'analyst_creator'
     else:
