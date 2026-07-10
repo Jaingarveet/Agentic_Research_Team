@@ -33,3 +33,4 @@ LANGSMITH_API_KEY='YOUR_LANGSMITH_API_KEY'
 - Or we could just let the RAG context be uploaded as a part of the running memory using langgraph store instead? (Might need to check for compounding increase in state_history if we let this much context in.)
 - Personalities to expert (or different model APIs, I only experimented with gpt-nano-5 due to cost issues.)
 - Fixed expert without analyst creator that converses according to domain requirement
+- Creating an inhouse MCP server seems a little unnecessary for this.
