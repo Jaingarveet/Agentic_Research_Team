@@ -1,7 +1,7 @@
 {
   "dockerfile_lines": [],
   "graphs": {
-    "research_assistant": "./AI_research_team_8_july.py:research_graph"
+    "research_assistant": "./graph.py:research_graph"
   },
   "env": "./.env",
   "python_version": "3.11",
