@@ -24,8 +24,8 @@ LANGSMITH_API_KEY='YOUR_LANGSMITH_API_KEY'
 **Uncomment the following if you are on the EU instance:**
  LANGSMITH_ENDPOINT=https://eu.api.smith.langchain.com
 
-
-
+**Reproduce the code:**
+- clone repo -> python environment -> env file for variables ->pip install requirements.txt -> langgraph dev
 
 **Future Directions:** 
 - Personalize the final report creation agent to retrieve an in memory store object to get across-conversational context of the user which an agent could submit as a conclusion to the store
