@@ -88,7 +88,7 @@ def HITL(state: UserSideInput):
     action = response.get("action", "").strip().lower()
     feedback = response.get("feedback", "").strip()
 
-    if action not in {"continue", "revise"}:
+    if action not in ["continue", "revise"]:
         raise ValueError(
             f"Invalid action '{action}'. Expected 'continue' or 'revise'."
         )
