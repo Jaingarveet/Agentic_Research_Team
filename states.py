@@ -38,7 +38,8 @@ class UserSideInput(MessagesState):
     sources_all_agents: Annotated[list,add] = Field(default_factory=[])
     intro : str = Field(description = 'Intro of the research paper draft by using all the conversation history.')
     body : str 
-    final_draft_sources: Annotated[list[str,int],add] = Field(description = """final sources that are used as references to generate the body of the research report""")
+    final_draft_sources: list[str] = Field(description = """final sources that were used as references to generate the body of the research report""")
+    overleaf_code: str = Field(description = """ Final report code generated from the body,intro,final_draft_sources. """)
 
 
 class structured_input(BaseModel):
@@ -51,7 +52,7 @@ class SingleInterviewState(BaseModel):
     analyst: Analyst_schema
     conversation_history: Annotated[list,add]  = Field(default_factory=[])
     number_of_turns: int = Field(description = """number of times the graph has looped and we reached analysts node""",
-                                default = 4)
+                                default = 0)
     # can make this a global variable for user to decide as well?
     web_search_context: Annotated[list,add] = Field(default_factory=[])
     sources: Annotated[list,add] = Field(default_factory=[])
@@ -68,4 +69,4 @@ class Answer_Structure(BaseModel):
 
 class body_and_sources_struct(BaseModel):
     body : str 
-    final_draft_sources: Annotated[list[str,int],add] = Field(description = """final sources that are used as references to generate the body of       the research report""")
+    final_draft_sources: Annotated[list[str],add] = Field(description = """final sources that are used as references to generate the body of       the research report""")
