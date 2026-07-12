@@ -78,7 +78,7 @@ def HITL(state: UserSideInput):
     response = interrupt(interrupt_payload)
 
     feedback = ""
-    next_step = ""
+    action = ""
 
     if not isinstance(response, dict):
         raise ValueError(
@@ -97,7 +97,7 @@ def HITL(state: UserSideInput):
     # if next_step not in ['continue' ,'revise']:
     #     raise ValueError(f"Invalid input '{next_step}'. Expected 'continue' or 'revise'.")
         
-    if next_step == 'continue':
+    if action == 'continue':
         return {'messages': [SystemMessage(content = 'User feels satisfied with the list please continue to interview process.')],
                'human_feedback': False}
    
@@ -125,7 +125,7 @@ def conditional_edge_HITL(state: UserSideInput):
                                             'current_answer' : '',
                                             'conversation_history_all_agents': [],
                                             'sources_all_agents':[]
-                                          }) for i in range(state['max_analysts'])]
+                                          }) for i in range(len(interviewers_list))]
 
 
 GENERATE_QUESTIONS_PROMPT = """ You are an analyst who is tasked to generate questions to conduct interview with an expert from the 
@@ -140,15 +140,6 @@ Generate 1 detailed question at a time!
 IMPORTANT NOTE: If you are satisfied with the current conversation and answers please respond back with:
 'Thank you for taking time I would like to conclude my interview now!'
 
-"""
-
-SUMMARIZATION_PROMPT = """ I would like you to summarize the following conversation in a concise manner without loosing much of the overall context.
-You may remove some of the trivial elements from the history but try to keep the most details as intact as possible.
-
-The word limit for summarization should be a maximum of 1000 words. 
-Try not to exceed this limit. A little flexibility over this is allowed.
-
-CONVERSATION HISTORY: {convo_hist}
 """
 
 
@@ -289,11 +280,14 @@ Based on that we have a conversation history between assistants and experts, sou
 and an introductory statement about the whole paper.
 
 Please draw a body for the research paper based on the given context mentioned in this prompt and below mentioned conversation history of individual AI research 
-assistants that has been compiled in one single context and please keep the word length to a maximum of 1000 words.
+assistants that has been compiled in one single context and please keep the word length to a maximum of 5000 words. (this is including an introductory paragraph about the body and the actual body, try to use as much detail as possible.)
+Please try to go into as detail as possible. 
 
 Introduction: {intro}
 
 Conversation_history: {convo_hist}
+
+Accessed Sources History: {sources_hist}
 
 
 You are not allowed to return empty handed and also you are not allowed to mention phrases similar to 'User had 4 assistants researching for him/her'.
@@ -301,13 +295,11 @@ Just write information regarding the topic by using appropriate info from the co
 
 All the sources used throughout different conversations will be provided as well and your responsibility is that when you are drafting 
 the body of the paper you are also supposed to mention the resource from which that information has been taken from.
-One idea you could use to ease your resource compilation is that every conversation history is sequential in some sense so all the sources
-are also nested sequentially with respect to nesting of each individual conversation.
 
-NOTE: Please provide sources as a title reference in the places where used throughout the body along with their integer id,
-while drawing out the sources section you are supposed to provide a list of sources in which each source will be a list that contains 
-a string at the 0 index (containing the source link) and an integer id at the 1 index (containing the id of the source which will also be mapped in the body as well while referencing).
-so essentially the overall sources list become a nested list where main_list--(contains)--> individual lists --(contains)--> source, id.
+
+NOTE: Please provide sources as a title reference in the places where used throughout the body inside curly brackets. Don't write the sources used in the body as references in the later body part itself rather you are supposed to return them inside the final_draft_sources. Only mention the title of the source in the curly brackets.
+
+NOTE: For final_draft_sources you are supposed to provide the title of the sources used and their actual URLs.
 """
 
 
@@ -316,16 +308,32 @@ def create_intro(state: UserSideInput):
     
     original_user_requirement = state['topic']
     convo_hist = state['conversation_history_all_agents']
-    response = model.invoke(CREATE_INTRO_PROMPT.format(convo_hist = convo_hist, original_user_requirement = original_user_requirement))
-    return {'intro': response.content}
-    
-def create_body_and_sources(state: UserSideInput):
-
-    intro = state['intro']
-    convo_hist = state['conversation_history_all_agents']
-    response = model.with_structured_output(body_and_sources_struct).with_config(temperature = 0.8).invoke(CREATE_BODY_AND_SOURCES_PROMPT.format(convo_hist = convo_hist, intro = intro))
+    sources_hist = state['sources_all_agents']
+    intro_response = model.invoke(CREATE_INTRO_PROMPT.format(convo_hist = convo_hist, original_user_requirement = original_user_requirement))
+    intro = intro_response.content
+    body_and_sources_response = model.with_structured_output(body_and_sources_struct).with_config(temperature = 0.8).invoke(CREATE_BODY_AND_SOURCES_PROMPT.format(convo_hist = convo_hist, intro = intro, sources_hist = sources_hist))
+    body = body_and_sources_response.body
+    sources = body_and_sources_response.final_draft_sources
     
     # We use a model with different temperature to present it more semi-formal writing
     # This might be used as a hyper parameter by user to judge how much formality they want in final report writing.
-    return {'body': response.body,
-           'final_draft_sources': response.final_draft_sources}
+    return {'intro': intro,
+           'body': body,
+           'final_draft_sources': sources}
+    
+CREATE_LATEX_FILE_PROMPT = """ You are given all the contents of a research paper that are to be used and you are tasked with converting that into a LATEX relevant .tex format code. You will be given title, introduction, body, URL sources as content for you to convert it into latex format of .tex. Reminder: You are not allowed to change the internal contents and wordings you will be provided, just try to create the code in executable format that can be directly uploaded to overleaf to compile. 
+
+INTRO: {intro}
+BODY: {body}
+SOURCES: {sources}
+"""
+
+def create_body_and_sources(state: UserSideInput):
+
+    intro = state['intro']
+    body = state['body']
+    sources = state['final_draft_sources']
+    convo_hist = state['conversation_history_all_agents']
+    latex_code_report = model.invoke(CREATE_LATEX_FILE_PROMPT.format(intro = intro, body = body, sources = sources))
+    
+    return {'overleaf_code': latex_code_report.content}
