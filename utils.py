@@ -1,5 +1,21 @@
 from typing import Literal
 from langchain.messages import SystemMessage
+from langchain.chat_models import init_chat_model
+
+SUMMARIZATION_PROMPT = """ I would like you to summarize the following conversation in a concise manner without loosing much of the overall context.
+You may remove some of the trivial elements from the history but try to keep the most details as intact as possible.
+
+The word limit for summarization should be a maximum of 1000 words. 
+Try not to exceed this limit. A little flexibility over this is allowed.
+
+CONVERSATION HISTORY: {convo_hist}
+"""
+
+
+model = init_chat_model(
+    model= 'gpt-5-nano',
+    temperature = 0.8
+)
 
 
 def check_token_usage(individual_turns : list) -> Literal['high','low']:
@@ -15,6 +31,6 @@ def check_token_usage(individual_turns : list) -> Literal['high','low']:
     else: 
         return 'low'
 
-def summarization_middleware(convo_hist: list):
+def summarization_middleware(convo_hist: list ):
     response = model.invoke([SystemMessage(content = SUMMARIZATION_PROMPT.format(convo_hist = convo_hist))])
     return response.content
