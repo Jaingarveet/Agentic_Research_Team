@@ -1,3 +1,4 @@
+import subprocess
 import json
 from langgraph.types import interrupt
 from pydantic import BaseModel
@@ -300,11 +301,12 @@ the body of the paper you are also supposed to mention the resource from which t
 NOTE: Please provide sources as a title reference in the places where used throughout the body inside curly brackets. Don't write the sources used in the body as references in the later body part itself rather you are supposed to return them inside the final_draft_sources. Only mention the title of the source in the curly brackets.
 
 NOTE: For final_draft_sources you are supposed to provide the title of the sources used and their actual URLs.
+NOTE: You are not supposed to return empty handed in terms of URLs Emphasize on mentioning the source title and it's URL within the final_draft_sources strictly.
 """
 
 
 
-def create_intro(state: UserSideInput):
+def content_compiler(state: UserSideInput):
     
     original_user_requirement = state['topic']
     convo_hist = state['conversation_history_all_agents']
@@ -328,12 +330,69 @@ BODY: {body}
 SOURCES: {sources}
 """
 
-def create_body_and_sources(state: UserSideInput):
+def latex_compiler(state: UserSideInput):
 
     intro = state['intro']
     body = state['body']
     sources = state['final_draft_sources']
     convo_hist = state['conversation_history_all_agents']
     latex_code_report = model.invoke(CREATE_LATEX_FILE_PROMPT.format(intro = intro, body = body, sources = sources))
+
+    res = subprocess.call(["touch","temp.tex"])
+    if res == 0:
+        print('Creating a temp.tex file to write the new overleaf code')
+        with open('temp.tex','w') as file:
+            file.write(latex_code_report.content)
+    else:
+        print("Not able to create the temp file for storing overleaf code locally.")
     
-    return {'overleaf_code': latex_code_report.content}
+    return {"messages": []}
+    
+def commit_to_overleaf(state: UserSideInput):
+
+    # safer to just use a script in background so that no agent is doing non-deterministic control over the commit
+
+    interrupt_payload = {"message": "Please look into introduction, body and the used resources once to approve!",
+                "introduction": state['intro'],
+                "body": state['body'],
+                "sources": state['final_draft_sources'],
+                "response_schema": {
+                    "action": {
+                        "type": "string",
+                        "enum": ["continue","end"]
+                    }
+                }
+            }
+
+
+    response = interrupt(interrupt_payload)
+    
+    action = ""
+
+    if not isinstance(response, dict):
+        raise ValueError(
+            f"Expected interrupt() to return a dict, got {type(response).__name__}"
+        )
+
+    action = response.get("action", "").strip().lower()
+
+    if action not in ["continue", "end"]:
+        raise ValueError(
+            f"Invalid action '{action}'. Expected 'continue' or 'revise'."
+        )
+        
+    if action == 'continue':
+        
+        print('Committing to the repo')
+        res = subprocess.call(["bash","script.sh"])
+                
+        if res == 0:
+            print("Successfully committed the report to overleaf")
+        else:
+            raise (Exception('Difficulty committing to your overleaf repo, check the provided arguments once again please!'))
+
+        return {"messages":[AIMessage(content = "Committed to overleaf project successfully!")]}
+   
+    return {"messages":[AIMessage(content = "Report generation was successful!")]}
+    
+# gitignore the bash script? , log files? update the state to remove overleaf_code thing
