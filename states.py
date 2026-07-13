@@ -39,7 +39,6 @@ class UserSideInput(MessagesState):
     intro : str = Field(description = 'Intro of the research paper draft by using all the conversation history.')
     body : str 
     final_draft_sources: list[str] = Field(description = """final sources that were used as references to generate the body of the research report""")
-    overleaf_code: str = Field(description = """ Final report code generated from the body,intro,final_draft_sources. """)
 
 
 class structured_input(BaseModel):
