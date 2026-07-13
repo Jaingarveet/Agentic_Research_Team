@@ -1,0 +1,16 @@
+langchain
+langchain-openai
+langchain-community
+langgraph
+langgraph-cli
+langsmith
+openai
+tavily-python
+jupyterlab
+notebook
+numpy
+sqlite-vec
+sqlalchemy
+uvicorn
+pydantic
+pydantic-settings
