@@ -1,5 +1,5 @@
 # import nodes:
-from nodes_and_edges import input_structuring_node, analyst_creator, HITL, conditional_edge_HITL, generate_and_ask_question, finish_convo, expert_search_query, web_search, answer_question, collect_interviews, create_intro, create_body_and_sources
+from nodes_and_edges import input_structuring_node, analyst_creator, HITL, conditional_edge_HITL, generate_and_ask_question, finish_convo, expert_search_query, web_search, answer_question, collect_interviews, content_compiler, latex_compiler, commit_to_overleaf
 
 # import required states: 
 from states import UserSideInput, SingleInterviewState
@@ -29,17 +29,18 @@ research_graph_builder.add_node('structure_input', input_structuring_node)
 research_graph_builder.add_node('analyst_creator', analyst_creator)
 research_graph_builder.add_node('HITL', HITL)
 research_graph_builder.add_node('conduct_interviews', interview_sub_graph.compile())
-research_graph_builder.add_node('create_intro',create_intro)
-research_graph_builder.add_node('create_body_and_sources',create_body_and_sources)
+research_graph_builder.add_node('content_compiler',content_compiler)
+research_graph_builder.add_node('latex_compiler',latex_compiler)
+research_graph_builder.add_node('commit_to_overleaf',commit_to_overleaf)
                         
 research_graph_builder.add_edge(START, 'structure_input')
 research_graph_builder.add_edge('structure_input', 'analyst_creator')
 research_graph_builder.add_edge('analyst_creator', 'HITL')
 
 research_graph_builder.add_conditional_edges('HITL', conditional_edge_HITL, ['analyst_creator', 'conduct_interviews'])
-research_graph_builder.add_edge('conduct_interviews','create_intro')
-research_graph_builder.add_edge('create_intro','create_body_and_sources')
-research_graph_builder.add_edge('create_body_and_sources', END)
-
+research_graph_builder.add_edge('conduct_interviews','content_compiler')
+research_graph_builder.add_edge('content_compiler','latex_compiler')
+research_graph_builder.add_edge('latex_compiler', 'commit_to_overleaf')
+research_graph_builder.add_edge('commit_to_overleaf', END)
 
 research_graph = research_graph_builder.compile()
