@@ -1,6 +1,7 @@
 from typing import Literal
 from langchain.messages import SystemMessage
 from langchain.chat_models import init_chat_model
+from langchain_core.messages.base import BaseMessage
 
 SUMMARIZATION_PROMPT = """ I would like you to summarize the following conversation in a concise manner without loosing much of the overall context.
 You may remove some of the trivial elements from the history but try to keep the most details as intact as possible.
@@ -18,8 +19,16 @@ model = init_chat_model(
 )
 
 
-def check_token_usage(individual_turns : list) -> Literal['high','low']:
+def check_token_usage(individual_turns : list[BaseMessage]) -> Literal['high','low']:
+    """ Checks the individual token(words) usage for individual interviews.
 
+      Args:
+        individual_turns: List of langchain Messages
+
+      Returns:
+        Literal: high or low indicating the token usage
+    """
+        
     individual_turn_tokens = [len(item.split()) for item in individual_turns]
     total_tokens_used_so_far = 0
     for tokens in individual_turn_tokens:
@@ -31,6 +40,18 @@ def check_token_usage(individual_turns : list) -> Literal['high','low']:
     else: 
         return 'low'
 
-def summarization_middleware(convo_hist: list ):
+def summarization_middleware(convo_hist: list[BaseMessage]) -> str:
+    
+    """ Summarizes the conversation history into precise pointers 
+         to reduce token context size while keeping most information intact.
+
+      Args:
+        convo_hist: List of langchain Messages containing (HumanMessage,AIMessage,SystemMessage) the conversation history of a single ongoing      
+        interview
+
+      Returns:
+        The summarized pointers in the form of a big string.
+    """
+    
     response = model.invoke([SystemMessage(content = SUMMARIZATION_PROMPT.format(convo_hist = convo_hist))])
     return response.content
