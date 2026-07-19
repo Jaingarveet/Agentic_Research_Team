@@ -7,7 +7,7 @@ from openai import RateLimitError, APIConnectionError, APITimeoutError
 from typing import Callable
 
 # import nodes:
-from nodes_and_edges import (input_structuring_node, analyst_creator, HITL, conditional_edge_HITL, generate_and_ask_question, finish_convo, expert_search_query, web_search, answer_question, collect_interviews, content_compiler, latex_compiler, commit_to_overleaf)
+from nodes_and_edges import (input_structuring_node, analyst_creator, HITL, conditional_edge_HITL, generate_and_ask_question, finish_convo, expert_search_query, web_search, answer_question, collect_interviews, content_compiler, latex_compiler,latex_validator, conditional_edge_latex_validation, commit_to_overleaf)
 
 from langgraph.types import RetryPolicy
 
@@ -78,6 +78,7 @@ research_graph_builder.add_node('conduct_interviews', interview_sub_graph.compil
 
 add_LLM_node(research_graph_builder,'content_compiler',content_compiler)
 add_LLM_node(research_graph_builder,'latex_compiler',latex_compiler)
+research_graph_builder.add_node('latex_validator', latex_validator)
 
 research_graph_builder.add_node('commit_to_overleaf',commit_to_overleaf) #runs a bash script manually
                         
@@ -88,7 +89,8 @@ research_graph_builder.add_edge('analyst_creator', 'HITL')
 research_graph_builder.add_conditional_edges('HITL', conditional_edge_HITL, ['analyst_creator', 'conduct_interviews'])
 research_graph_builder.add_edge('conduct_interviews','content_compiler')
 research_graph_builder.add_edge('content_compiler','latex_compiler')
-research_graph_builder.add_edge('latex_compiler', 'commit_to_overleaf')
+research_graph_builder.add_edge('latex_compiler', 'latex_validator')
+research_graph_builder.add_conditional_edges('latex_validator', conditional_edge_latex_validation, ['latex_compiler','commit_to_overleaf'])
 research_graph_builder.add_edge('commit_to_overleaf', END)
 
 research_graph = research_graph_builder.compile()
