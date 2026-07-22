@@ -1,0 +1,132 @@
+
+// # Core project related things for dockerignore:
+.git 
+.gitignore
+
+  
+# ======================
+# Python
+# ======================
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Compiled extensions
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Python packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+wheels/
+*.whl
+MANIFEST
+
+
+# ======================
+# Environment / Secrets
+# ======================
+
+.env
+.envrc
+
+
+# ======================
+# Testing / Coverage
+# ======================
+
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+
+
+# ======================
+# Type checking / Linting
+# ======================
+
+.mypy_cache/
+.dmypy.json
+.pyre/
+.pytype/
+.ruff_cache/
+
+
+# ======================
+# Jupyter
+# ======================
+
+.ipynb_checkpoints/
+
+
+# ======================
+# IDEs
+# ======================
+
+.vscode/
+.idea/
+.spyderproject
+.spyproject
+.ropeproject
+
+
+# ======================
+# OS files
+# ======================
+
+.DS_Store
+Thumbs.db
+
+
+# ======================
+# Logs / Temporary files
+# ======================
+
+*.log
+tempCodeRunnerFile.py
+
+
+# ======================
+# Local application state
+# ======================
+
+.langgraph_api/
+.langgraph/
+
+*.sqlite
+*.db
+
+
+# ======================
+# Project-specific
+# ======================
+
+contemplation.txt
+temp_latex_code/
+temp_latex_code_validation_log/
+temp_git_integration/
+
+
+# ======================
+# Misc Python tools
+# ======================
+
+.pypirc
+__pypackages__/
+.pdm-python
+.pdm-build/
+.pixi/
