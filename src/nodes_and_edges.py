@@ -8,6 +8,9 @@ from langchain.messages import SystemMessage, AIMessage, HumanMessage
 from tavily import TavilyClient
 from utils import check_token_usage, summarization_middleware, get_prompts, get_interrupt_response
 from states import Analyst_schema, Analyst_collection, UserSideInput, structured_input, SingleInterviewState, Question_Structure, Answer_Structure, body_and_sources_struct, source_item_schema
+from prompts import (STRUCTURED_INPUT_message, ANALYST_CREATOR_PROMPT, GENERATE_QUESTIONS_PROMPT, 
+           SEARCH_QUERY_EXPERT_PROMPT, EXPERT_ANSWER_PROMPT, EXPERT_RANK_SOURCES_PROMPT, CREATE_INTRO_PROMPT, 
+           CREATE_BODY_AND_SOURCES_PROMPT, CREATE_LATEX_FILE_PROMPT, LATEX_REPORT_IMPROVEMENT_PROMPT)
 
 model = init_chat_model(
     model= 'gpt-5-nano',
@@ -15,9 +18,6 @@ model = init_chat_model(
 )
 
 web_search_client = TavilyClient()
-
-STRUCTURED_INPUT_message, ANALYST_CREATOR_PROMPT, GENERATE_QUESTIONS_PROMPT, SEARCH_QUERY_EXPERT_PROMPT, EXPERT_ANSWER_PROMPT, EXPERT_RANK_SOURCES_PROMPT, CREATE_INTRO_PROMPT, CREATE_BODY_AND_SOURCES_PROMPT, CREATE_LATEX_FILE_PROMPT, LATEX_REPORT_IMPROVEMENT_PROMPT = get_prompts()
-
 
 def input_structuring_node(state: UserSideInput) -> dict[str,Any]:
     
@@ -365,6 +365,7 @@ def content_compiler(state: UserSideInput) -> dict[str,Any]:
     original_user_requirement = state['topic']
     convo_hist = state['conversation_history_all_agents']
     sources_hist = state['sources_all_agents']
+
     Audience_schema = state['target_audience']
     
     intro_response = model.invoke(CREATE_INTRO_PROMPT.format(convo_hist = convo_hist, original_user_requirement = original_user_requirement, Audience_schema = Audience_schema ))
@@ -383,7 +384,14 @@ def content_compiler(state: UserSideInput) -> dict[str,Any]:
 def latex_compiler(state: UserSideInput) -> dict[str,[]]:
     
     """ Latex compiling node that compiles the already existing intro,body and sources into a .tex code format to make it runnable on 
-        overleaf.
+        overleaf. 
+        
+        (For self-healing: it refines the latex code in case there are some compilation error on local level)
+        
+        PLAUSIBLE FUTURE IMPROVEMENTS: Current strategy uses improvement_prompt containing error logs and the original code but this can be 
+        improved using agentic pipeline so that we only modify the core part where the error logs are shown instead of generating full code file 
+        again so that it saves token cost in reasoning about full code file and only focus on modifying the particular error logs related content 
+        directly. This might be a good idea when our report token and length increases rapidly in production settings.
     
       Args:
         state: Takes the global state as argument
@@ -395,9 +403,9 @@ def latex_compiler(state: UserSideInput) -> dict[str,[]]:
     latex_error_attempts = state.get('latex_error_attempts',0)
     latex_error_logs = state.get('latex_error_logs',[])
 
-    if 0 < latex_error_attempts < 5:
+    if 0 < latex_error_attempts <= 5:
         read_file = ""
-        with open('temp.tex', 'r') as file:
+        with open('../temp_latex_code/temp.tex', 'r') as file:
             read_file = file.read()
         
         formatted_improvement_prompt = LATEX_REPORT_IMPROVEMENT_PROMPT.format(Latest_error = latex_error_logs[-1],
@@ -405,11 +413,10 @@ def latex_compiler(state: UserSideInput) -> dict[str,[]]:
                                                                                  latex_file_code = str(read_file))
         updated_latex_code_report = model.invoke(formatted_improvement_prompt)
         
-        with open('temp.tex', 'w') as file:
+        with open('../temp_latex_code/temp.tex', 'w') as file:
             read_file = file.write(updated_latex_code_report.content)
         
         return {"messages": []}
-        
 
     intro = state['intro']
     topic = state['topic']
@@ -422,28 +429,40 @@ def latex_compiler(state: UserSideInput) -> dict[str,[]]:
     
     latex_code_report = model.invoke(Updated_CREATE_LATEX_FILE_PROMPT)
         
-    with open('temp.tex','w') as file:
+    with open('../temp_latex_code/temp.tex','w') as file:
         file.write(latex_code_report.content)
     
     return {"messages": []}
 
 def latex_validator(state: UserSideInput) -> dict[str,Any]: 
     
-    """ 
+    """ Latex Validator node, this is the core logic of self-healing latex pipeline where we run the latex code locally once,
+    and make the error logs only extract useful information about specific lines and relevant positional context.
+    
+      Args:
+        state: Takes the global state as argument
+
+      Returns:
+        Dictionary object modifying the global state for error logs, attempt number, boolean of wether revision is required or not
     """
     
     latex_error_attempts = state.get('latex_error_attempts',0)
-    latex_error_logs = state.get('latex_error_logs',[])
     
     try:
-        res = subprocess.run(["pdflatex", "-draftmode", "-interaction=nonstopmode","-file-line-error","-output-directory=./tmp", "temp.tex"],
+        res = subprocess.run(["pdflatex", 
+                              "-draftmode",
+                              "-interaction=nonstopmode",
+                              "-file-line-error",
+                              "-output-directory=../temp_latex_code_validation_log",
+                              "../temp_latex_code/temp.tex"],
             capture_output=True,
             text=True,
             timeout=10)
+        # timeout is basically how long to wait for the child process to run and complete else throw TimeoutExpired exception
         
         if res.returncode==0:
             return {'messages': [AIMessage(content = 'Latex code compilation successful!')],
-                    'latex_error_logs': None,
+                    'latex_error_logs': [],
                     'revise_latex': False}
         else: 
             full_error_log = res.stdout.split('\n')
@@ -463,17 +482,24 @@ def latex_validator(state: UserSideInput) -> dict[str,Any]:
                     'revise_latex': True}
 
     except subprocess.TimeoutExpired as e: 
-         return {'latex_error_logs': [f"Compilation timeout: {str(e)}"],
-                 'latex_error_attempts': latex_error_attempts + 1,
-                 'revise_latex': True}
+         raise Exception(f""" Compilation Timeout occurred while trying to run the latex file locally, Error: {str(e)}""")
 
     
     except Exception as e:
-        raise Exception(f"Critical error while validating latex code: {str(e)}")
+        raise Exception(f"Critical error in latex code validation compilation run: {str(e)}")
 
 def conditional_edge_latex_validation(state: UserSideInput) -> Literal['latex_compiler','commit_to_overleaf']: 
+    """ Conditional edge to re-route in case the latex validation is required or not, also checks on wether the attempts to revise has been 
+    exhausted or not.
+    
+      Args:
+        state: Takes the global state as argument
 
-    if state['revise_latex']: 
+      Returns:
+        Literal: node names based on relevant conditions: latex_compiler or commit_to_overleaf
+    """
+    
+    if state['revise_latex'] and (state['latex_error_attempts']<=5):
         return 'latex_compiler'
     else : 
         return 'commit_to_overleaf'
@@ -483,10 +509,11 @@ def commit_to_overleaf(state: UserSideInput) -> dict[str,list[BaseMessage]]:
     
     """ This node is used to commit the temp.tex file created in previous node to overleaf using bash script.
         The bash script runs a git version control over the overleaf project and commits the new report to that.
+        Bash script exits with a status code of 0 if commit was success else we directly raise error so that we don't 
+        have any risky code getting access to the overleaf file.
         
       Args:
-        No argument needed since we don't retrieve any information from the state even though langgraph still passes the global 
-        state to every node at it's level.
+        Only need the global state to access information to create interrupt payload
 
       Returns:
         Dictionary object with message from AI that report generation was successful.
@@ -512,7 +539,7 @@ def commit_to_overleaf(state: UserSideInput) -> dict[str,list[BaseMessage]]:
     if action == 'continue':
         
         result = subprocess.run(
-            ["bash", "script.sh"],
+            ["bash", "../scripts/script.sh"],
             capture_output=True,
             text=True)
         
@@ -521,5 +548,4 @@ def commit_to_overleaf(state: UserSideInput) -> dict[str,list[BaseMessage]]:
         
         return {"messages": [AIMessage(content="Committed to Overleaf project successfully!")]}
    
-    return {"messages":[AIMessage(content = "Report generation was successful!")]}
-    
+    return {"messages":[AIMessage(content = """ Report generation was successful!, checkout the contens in temp.tex file, haven't committed to overleaf yet. """)]}
