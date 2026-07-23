@@ -1,0 +1,3 @@
+This folder contains the trial runs for the final project along with additional information from observability 
+tools in langsmith studio.
+To be continued...
