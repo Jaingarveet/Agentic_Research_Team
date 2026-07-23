@@ -2,7 +2,7 @@ langchain
 langchain-openai
 langchain-community
 langgraph
-langgraph-cli
+langgraph-cli[inmem]
 langsmith
 openai
 tavily-python
