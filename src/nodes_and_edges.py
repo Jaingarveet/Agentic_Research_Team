@@ -1,3 +1,4 @@
+from pathlib import Path
 import subprocess
 from typing import Any, Literal
 from pydantic import BaseModel
@@ -6,9 +7,9 @@ from langgraph.types import Send, Overwrite, Command
 from langchain.chat_models import init_chat_model
 from langchain.messages import SystemMessage, AIMessage, HumanMessage
 from tavily import TavilyClient
-from utils import check_token_usage, summarization_middleware, get_prompts, get_interrupt_response
-from states import Analyst_schema, Analyst_collection, UserSideInput, structured_input, SingleInterviewState, Question_Structure, Answer_Structure, body_and_sources_struct, source_item_schema
-from prompts import (STRUCTURED_INPUT_message, ANALYST_CREATOR_PROMPT, GENERATE_QUESTIONS_PROMPT, 
+from src.utils import check_token_usage, summarization_middleware, get_interrupt_response
+from src.states import Analyst_schema, Analyst_collection, UserSideInput, structured_input, SingleInterviewState, Question_Structure, Answer_Structure, body_and_sources_struct, source_item_schema
+from src.prompts import (STRUCTURED_INPUT_message, ANALYST_CREATOR_PROMPT, GENERATE_QUESTIONS_PROMPT, 
            SEARCH_QUERY_EXPERT_PROMPT, EXPERT_ANSWER_PROMPT, EXPERT_RANK_SOURCES_PROMPT, CREATE_INTRO_PROMPT, 
            CREATE_BODY_AND_SOURCES_PROMPT, CREATE_LATEX_FILE_PROMPT, LATEX_REPORT_IMPROVEMENT_PROMPT)
 
@@ -18,6 +19,16 @@ model = init_chat_model(
 )
 
 web_search_client = TavilyClient()
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+TEMP_LATEX_DIR = PROJECT_ROOT / "temp_latex_code"
+TEMP_LATEX_VALIDATION_LOG_DIR = PROJECT_ROOT / "temp_latex_code_validation_log"
+
+TEMP_LATEX_DIR.mkdirs(parents=True, exist_ok=True)
+TEMP_LATEX_VALIDATION_LOG_DIR.mkdirs(parents=True, exist_ok=True)
+
+LATEX_FILE = TEMP_LATEX_DIR / "temp.tex"
 
 def input_structuring_node(state: UserSideInput) -> dict[str,Any]:
     
@@ -399,13 +410,13 @@ def latex_compiler(state: UserSideInput) -> dict[str,[]]:
       Returns:
         Dictionary object with empty message since we need to write the given content in a temp file.
     """
-
+    
     latex_error_attempts = state.get('latex_error_attempts',0)
     latex_error_logs = state.get('latex_error_logs',[])
 
     if 0 < latex_error_attempts <= 5:
         read_file = ""
-        with open('../temp_latex_code/temp.tex', 'r') as file:
+        with open(LATEX_FILE, 'r') as file:
             read_file = file.read()
         
         formatted_improvement_prompt = LATEX_REPORT_IMPROVEMENT_PROMPT.format(Latest_error = latex_error_logs[-1],
@@ -413,11 +424,11 @@ def latex_compiler(state: UserSideInput) -> dict[str,[]]:
                                                                                  latex_file_code = str(read_file))
         updated_latex_code_report = model.invoke(formatted_improvement_prompt)
         
-        with open('../temp_latex_code/temp.tex', 'w') as file:
+        with open(LATEX_FILE, 'w') as file:
             read_file = file.write(updated_latex_code_report.content)
         
         return {"messages": []}
-
+    
     intro = state['intro']
     topic = state['topic']
     body = state['body']
@@ -429,7 +440,7 @@ def latex_compiler(state: UserSideInput) -> dict[str,[]]:
     
     latex_code_report = model.invoke(Updated_CREATE_LATEX_FILE_PROMPT)
         
-    with open('../temp_latex_code/temp.tex','w') as file:
+    with open(LATEX_FILE,'w') as file:
         file.write(latex_code_report.content)
     
     return {"messages": []}
@@ -453,8 +464,8 @@ def latex_validator(state: UserSideInput) -> dict[str,Any]:
                               "-draftmode",
                               "-interaction=nonstopmode",
                               "-file-line-error",
-                              "-output-directory=../temp_latex_code_validation_log",
-                              "../temp_latex_code/temp.tex"],
+                              f"-output-directory={TEMP_LATEX_VALIDATION_DIR}",
+                              str(LATEX_FILE)],
             capture_output=True,
             text=True,
             timeout=10)
