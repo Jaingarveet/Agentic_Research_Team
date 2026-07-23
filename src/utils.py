@@ -3,7 +3,7 @@ from langchain.messages import SystemMessage
 from langchain.chat_models import init_chat_model
 from langchain_core.messages.base import BaseMessage
 from langgraph.types import interrupt
-from prompts import SUMMARIZATION_PROMPT
+from src.prompts import SUMMARIZATION_PROMPT
 
 model = init_chat_model(
     model= 'gpt-5-nano',
