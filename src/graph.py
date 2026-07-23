@@ -7,7 +7,7 @@ from openai import RateLimitError, APIConnectionError, APITimeoutError
 from typing import Callable
 
 # import nodes:
-from nodes_and_edges import (input_structuring_node, analyst_creator, HITL, conditional_edge_HITL, generate_and_ask_question, finish_convo, expert_search_query, web_search, answer_question, collect_interviews, content_compiler, latex_compiler,latex_validator, conditional_edge_latex_validation, commit_to_overleaf)
+from src.nodes_and_edges import (input_structuring_node, analyst_creator, HITL, conditional_edge_HITL, generate_and_ask_question, finish_convo, expert_search_query, web_search, answer_question, collect_interviews, content_compiler, latex_compiler,latex_validator, conditional_edge_latex_validation, commit_to_overleaf)
 
 from langgraph.types import RetryPolicy
 
