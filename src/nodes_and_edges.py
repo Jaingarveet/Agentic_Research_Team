@@ -25,6 +25,8 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 TEMP_LATEX_DIR = PROJECT_ROOT / "temp_latex_code"
 TEMP_LATEX_VALIDATION_LOG_DIR = PROJECT_ROOT / "temp_latex_code_validation_log"
 
+SCRIPT_LOCATION = PROJECT_ROOT / "scripts" / "script.sh"
+
 TEMP_LATEX_DIR.mkdir(parents=True, exist_ok=True)
 TEMP_LATEX_VALIDATION_LOG_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -550,7 +552,7 @@ def commit_to_overleaf(state: UserSideInput) -> dict[str,list[BaseMessage]]:
     if action == 'continue':
         
         result = subprocess.run(
-            ["bash", "../scripts/script.sh"],
+            ["bash", str(SCRIPT_LOCATION)],
             capture_output=True,
             text=True)
         
