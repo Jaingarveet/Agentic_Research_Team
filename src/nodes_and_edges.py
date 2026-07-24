@@ -464,7 +464,7 @@ def latex_validator(state: UserSideInput) -> dict[str,Any]:
                               "-draftmode",
                               "-interaction=nonstopmode",
                               "-file-line-error",
-                              f"-output-directory={TEMP_LATEX_VALIDATION_DIR}",
+                              f"-output-directory={TEMP_LATEX_VALIDATION_LOG_DIR}",
                               str(LATEX_FILE)],
             capture_output=True,
             text=True,
