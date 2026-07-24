@@ -25,8 +25,8 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 TEMP_LATEX_DIR = PROJECT_ROOT / "temp_latex_code"
 TEMP_LATEX_VALIDATION_LOG_DIR = PROJECT_ROOT / "temp_latex_code_validation_log"
 
-TEMP_LATEX_DIR.mkdirs(parents=True, exist_ok=True)
-TEMP_LATEX_VALIDATION_LOG_DIR.mkdirs(parents=True, exist_ok=True)
+TEMP_LATEX_DIR.mkdir(parents=True, exist_ok=True)
+TEMP_LATEX_VALIDATION_LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 LATEX_FILE = TEMP_LATEX_DIR / "temp.tex"
 
