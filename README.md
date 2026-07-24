@@ -1,20 +1,82 @@
 # Agentic_Research_Team
-This repo contains the code of my project: Agentic_research team which is an automated multi_agent architecture built using langgraph,langchain and langsmith. Main use case is automating research analysis and report generation without loosing technical details. Gives a decent point to start your research paper and projects from rather than doing everything on your own.
+A hierarchical, multi-agent research pipeline built with LangGraph. This system dynamically provisions parallel AI analysts to research a topic, conduct simulated expert interviews, compile a comprehensive technical report, and self-heal LaTeX compilation errors before deterministically committing the final paper to Overleaf.
 
-Lots to do ::
+(My main motivation for this project was to do a case study in AI Platform Engineering and an attempt to make agentic workflows as deterministic as possible with minimal user interaction.)
 
+KEYWORDS:  parallel sub-graphs, self-healing loop, human-in-the loop checkpoints, dynamic summarization middleware, retry policies, audience modelling, conditional re-routing and web_search funcitonality.
 
-Semi-final graph draft
-
+## Graph image: 
 <img width="489" height="475" alt="Screenshot 2026-07-08 at 4 25 54 PM" src="https://github.com/user-attachments/assets/27fa1a78-012a-4bb7-9cd7-12013582a02d" />
+
+## Breif explanation/flow of the architecture: 
+The architecture splits into a parent graph concerned with orchestration and compilation of the research and multiple parallel sub-graph concerened with targeted research.
+
+**Flow:** 
+
+Prepartion Phase:
+- Combines input structuring node that accepts raw user prompt about the topic with details about the target audience as an option. Else the structuring node uses default values assigned using pydantic field. This also specifies max analysts to a default value of 4.
+- Then we move on to create analysts that uses an analyst schema to create unique analysts and dynamically decide the number of analysts.
+- After this we move on to a HITL node that uses interrupts and conditional re-routing to either carry on to conduct interviews parallely or take user feedback(optional) and revise the current analysts by moving back to analyst creation node.
+
+Research Phase: 
+- Research phase is done inside a sub-graph parallely for each analyst where the analyst node's responsiblity is to generate detailed question to be asked to the expert using a conversation history(if exists) as a context and the pointers along with responsiblities during interview provided to the analyst during it's creation. Additionally, the analyst node is also used to check the length of conversation to decide to wether summarize the conversation or not given if the max number of words > 5000 to prevent context-window overflow.
+- Conditional routing happens to either conclude the interview (we ask analyst to specify a thank you concluding statement if satisfied with interview or we have a max number of turns = 5) or moving on to expert node.
+- In order to keep the expert as legitimate as possiible we first ask the expert to generate a detailed search query to counter the analyst question in best way possible. Then we move on to gathering the web-search context for the search query and the actual URLs to be later referenced as sources. (This node uses a dynamic modification in search query in case it ever reaches more than 400 characters which is not allowed in tavily search api.) (The prompts for expert and analyst are arranged in GAN sort of way which can be further improved. Look into design tradeoffs and future works section for this.)
+- Then we move on to the actual expert node where it answers the analyst's question given the summary of conversation, gathered resources and contents from web-api, and to actually rank sources in terms of quality and retrieved context as good,moderate or unfavourable.
+- We loop back to analyst node after recieiving the latest answer and then given conclusive conditions we move on to collect inerviews node which takes all the resources(with their quality) and conversation history between each expert and analyst to overwrite the global/parent state so that they can be directly added using appropriate reducers(Annotated[list,add]) in the global state.
+NOTE: Each interview is conducted with a unique id generated while initializing parallel interviews for better observability. (Look into the sub-graph's state for this!)
+
+Compilation Phase
+NOTE: There were explicit instructions to weigh the sources ranked as good more while drafting the final report for more legitemacy. 
+- We have a content compiler node that is given original requirement of user, target audience schema, conversation history of all agents, source history of all agents to firstly compile an introductory paragraph for the report.
+-  Then using this same context and introduction paragraph we generate the text body and final sources draft that combines a detailed techincal body and uses references in title form throughout the body and mentions all the relevant sources used along with their original URLS in the final_draft sources.
+-  Then we move on to compiling the latex code for the same content generated by content compilation node, this step is essentially separated since the project is using 'gpt-5-nano' for the current implementation and then it also saves reasoning tokens on regenerating the whole content compared to only generating the actual latex-code given the error log in self-healing loop. NOTE: It's was better to save the code in a local temp file since passing that big of a state variable while validation would have resulted in context window exceptions.
+- We then move on to latex code validation that uses subprocess module of python and pdflatex to compile the temp code file locally and retrieve either the success code or the errors in compilation and store them in global state to be used during code refinement/self-healing loop. (NOTE: The actual logs are stored inside a temp_latex_validation log directory)
+- Conditional routing decides wether teh code compilation was successful or not and routes accordingly either back to the latex code compilation node or the final latex_overleaf committing node.
+- The latex commit node uses HITL/interrupt in order to recieve final confirmation from the user to proceed committing to the overleaf repo using subprocess module along with a bash script for git integration. Commit successfuly then we can see the result on overleaf ::: if not then we still have all the things stored in latex code and global state so atleast information is not lost and even if we end up restarting the langgraph server we still have a local code file where we should see the generated code.
+
+
+## Key Technical Highlights:
+
+**Average completion time:** To be added
+
+**Average Token Efficiency & Cost:** To be added
+
+**Dynamic Multi-agent collaboration + Map-Reduce Architecture:** Uses Langgraph's Send API to dynamically spawn an arbitrary number (max 4 to keep the API limits for web-search and general token usage intact) of domain-specific analyst agents that conduct interviews with domain experts (experts uses a determinsitc web-search node to have an information levarage over analysts which makes them experts) to get detailed insights of the domain to be later compiled into a techincal report.
+
+**Dynamic modification of web_search query** To account for character limits in Tavily API, the expert-search-query generator node automatically modifies and trims down the search query in case it gets over a limit of more than 30 words (Tavily limit is 300-400 characters).
+
+**Self-Healing Code Compilation:** Codebase features an automated loop built using conditional routing that checks the final LaTeX code compiled with the help of pdflatex and automatically filters out the raw logs, isolating specific failure lines and passes it to code compiler to rewrite the document until it either compiles perfectly or runs out of attempts (max 5) to fix. Observing traces for this particular thing led to the conclusion that giving direct logging errors led to lower reasoning token usage. (Check out Future works section for more ideas on how to further optimize this thing)
+
+**Retry Handling:** Specifically customized retry policies tailored to only handle issues related to connection/network errors, API timeouts and token rate limit across OpenAI and Tavily endpoints.
+
+**Deterministic vs Non-Deterministic workflows:**
+Instead of using an MCP server to handle overleaf integration, the current code uses a bash script that does the git integration using overleaf git integration workflow in a deterministic node which also helps in saving the code even if the overleaf integration results in exceptions. Also it uses subprocess python module to run bash script to catch standard errors and pass custom arguments like logging output directory.
+
+**Expert node ranks sources:** For better reasoning and lowering hallucinations at the content compilation node, the expert_answer node is used to rank the sources it used to generate answers in three category: good,moderate, unfavourable. This allows more legitimate claims and robust interpretations to be made by content compilation node.
+
+**Hallucination management in interviews: summarization middleware:**
+To manage compounding token usage which was resulting in extensive hallucinations and very high token usage, we use a summarization middleware that summarizes the conversation history in each interview individually in precise points in less than 1000 words. 
+
+**Hierarchial State Management:**
+Separate state is used for subgraph to reduce compounding state issue and also makes the code much readable and manageable.
+
+**Deign trade-off:** 
+- One thing that could be optimized further is directly removing any bad ranked sources during the interviews themselves and only use the good sources even if it is limited? Might also save reasoning tokens at expert node level.
+- Logging functionality could be added at backend level if things go into production to know where thing broke and from which user and criticalness.
+- Right now only the prompts of the analysts and experts are to counter act each other's responses with more legitimate claims and questions which can be further improved to reduce hallucination even further down the line.
+- No langgraph memory store to personalize the pipeline since we are not building a personal research assistant
+- No need to use trustcall since even though this project contains a lot of different schemas, at heirarcial level we only have atmost 2 levels.(Parent, sub-graph)
+- Limited number of libraries allowed to latex compilation node since we use local validation check whose dependency requirements increase significantly due to broad range of latex libraries available.
+- Could have used githooks over commit functionality in overleaf but creating a hook and just making a pull and push request, the latter one seemed easier and cleaner since we anyways need to use bash script for initial ""git add remote overleaf account"" command.
+- If this were to be a little non-deterministic graph, I would have introduced some heirarchical fallback strategies like degradation level and based on that route to backup nodes.
+- Can use different models for expert to further become more legitimate.
+- One acute observation I got was that a very good detailed expert prompt optimizes web-search query to a level that retrieves much legitimate sources compared to providing multiple source related APIs. (Obviously, not gonna name the projects I am talking about ;)
 
 **environment file should look like this:**
 
 OPENAI_API_KEY='YOUR_OPEN_AI_API_KEY'
 TAVILY_API_KEY='YOUR_TAVILY_API_KEY'
-
-ANTHROPIC_API_KEY='your_anthropic_api_key_here'
-GOOGLE_API_KEY='your_google_api_key_here'
 
 **Optional for evaluation and tracing**
 LANGSMITH_API_KEY='YOUR_LANGSMITH_API_KEY'
@@ -22,15 +84,26 @@ LANGSMITH_API_KEY='YOUR_LANGSMITH_API_KEY'
  LANGSMITH_TRACING=true
  LANGSMITH_PROJECT= your_project_name
 **Uncomment the following if you are on the EU instance:**
- LANGSMITH_ENDPOINT=https://eu.api.smith.langchain.com
+ #LANGSMITH_ENDPOINT=https://eu.api.smith.langchain.com
 
 **Reproduce the code:**
 - clone repo -> python environment -> env file for variables ->pip install requirements.txt -> langgraph dev
 
+
 **Future Directions:** 
-- Personalize the final report creation agent to retrieve an in memory store object to get across-conversational context of the user which an agent could submit as a conclusion to the store
+- MAIN FUTURE WORK: Adversarial Multi-Agent verification (AGENTIC GANS) SYSTEM :
+We can introduce a dedicated adversarial critique whose sole job is to act as a discriminator-actively trying to poke holes in the analyst's arguments, challenge source legitimacy, and identify logical fallacies.(can use different models and personalities as well, I am definite I read a paper that makes an agentic team more robust with different personalities, how a real team works)
+Adversarial Iteration Loop: Instead of a linear synthesis, the Generator (Analyst) and Discriminator (Critic) engage in a closed-loop debate within the sub-graph. The analyst must defend, re-query, or drop claims that fail the critic's stress-test before the data is ever passed to the global compiler.
+Impact: This approach aims to push hallucination rates down even further by replacing passive validation with active, adversarial cross-examination.
+- Personalize the final report creation agent to retrieve an in memory store object to get across-conversational context of the user which an agent could submit as a conclusion in the langgraph memory store.
 - Let user upload a pdf of a research paper as well (by building a RAG toolnode for that) or some sources links that allows to get a broader context rather than conducting interviews (though it also uses web_search anyways which can be also extended using wikipedia api parallely).
 - Or we could just let the RAG context be uploaded as a part of the running memory using langgraph store instead? (Might need to check for compounding increase in state_history if we let this much context in.)
 - Personalities to expert (or different model APIs, I only experimented with gpt-nano-5 due to cost issues.)
 - Fixed expert without analyst creator that converses according to domain requirement
 - Creating an inhouse MCP server seems a little unnecessary for this.
+- using more better models for experts, compilation and stuff, don't know the actual token usage that will get affected though?
+- heirarchial fall back strategy based on degradation levels.
+Targeted Code Refinement
+Currently, the self-healing LaTeX loop feeds the entire .tex document back to the model alongside the stdout error logs. While effective, this is token-heavy for large reports.
+Unit Economics / Future Optimizations (Saving 15k tokens per loop)
+- if a developer is ok with security things or could sandbox this even further even though langgraph runs dockerized on it's own then could be a good idea to provide MCP server tools and resources and create an overleaf management sub-graph / agent. I didn't opt for this since I wanted more determinism and control over commit functionality.
