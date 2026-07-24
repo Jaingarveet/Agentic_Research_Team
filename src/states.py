@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
-from typing import Optional, Annotated, TypedDict, Literal
+from typing import Optional, Annotated, Literal
+from typing_extensions import TypedDict
 from langgraph.graph import MessagesState
 from operator import add
 
