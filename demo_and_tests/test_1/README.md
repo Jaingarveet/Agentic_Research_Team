@@ -1,6 +1,8 @@
 # Run Results & Execution Trace
 
 This directory contains artifacts and screenshots from a single successful execution of the Agentic Research Team pipeline.
+`INPUT TOPIC: 
+Correlation Between Attention Span and Mental Health Issues: A 2026 Synthesis for a Broad Audience`
 
 The run demonstrates:
 - Dynamic analyst generation
