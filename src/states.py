@@ -87,6 +87,6 @@ class final_draft_source_item_schema(TypedDict):
     url: str
 
 # need runtime schema validation for this = BaseModel!
-class body_and_sources_struct(BaseModel):
-    body : str = Field(description = "body of the draft")
-    final_draft_sources: Annotated[list[final_draft_source_item_schema],add] = Field(description = """final sources that are used as references to generate the body of       the research report""")
+# class body_and_sources_struct(BaseModel):
+    # body : str = Field(description = "body of the draft")
+    # final_draft_sources: Annotated[list[final_draft_source_item_schema],add] = Field(description = """final sources that are used as references to generate the body of       the research report""")
