@@ -1,6 +1,8 @@
 # Run Results & Execution Trace
 
-This directory contains artifacts and screenshots from a single successful execution of the Agentic Research Team pipeline.
+This directory contains artifacts and screenshots from the second successful execution of the Agentic Research Team pipeline.
+
+`INPUT TOPIC: Quantum Computing in Cryptography: Post-Quantum Migration Strategies, Risk Assessment, and Enterprise Preparedness for Critical Infrastructure`
 
 The run demonstrates:
 - Dynamic analyst generation
