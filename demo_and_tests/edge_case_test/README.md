@@ -77,3 +77,7 @@ The screenshot below shows the validation loop successfully detecting and resolv
 ## 5. Generated Output
 
 The final generated technical report from this run can be found as output_1 in test_1
+`NOTE: The output generated in this case contains an edge case which might be addressed in future works`
+* **State Deduplication & Sequence Mapping:** While the system dynamically generates unique domain analysts to prevent redundant interviews, using `Annotated[list, add]` for map-reduce state aggregation introduces a risk of content duplication. Because the global state blindly appends interview outputs, the compilation node occasionally receives overlapping content without strict sequential awareness.
+* Sections 4, 6, 8, and 10 are identical duplicate text ("A practical, implementable harmonization and integration plan").
+* Sections 5, 7, and 9 are identical duplicate text ("Practical implications: concrete recommendations...").
