@@ -7,8 +7,8 @@ from langgraph.types import Send, Overwrite, Command
 from langchain.chat_models import init_chat_model
 from langchain.messages import SystemMessage, AIMessage, HumanMessage
 from tavily import TavilyClient
-from src.utils import check_token_usage, summarization_middleware, get_interrupt_response
-from src.states import Analyst_schema, Analyst_collection, UserSideInput, structured_input, SingleInterviewState, Question_Structure, Answer_Structure, body_and_sources_struct, source_item_schema
+from src.utils import check_token_usage, summarization_middleware, get_interrupt_response, sanitize_latex_code
+from src.states import Analyst_collection, UserSideInput, structured_input, SingleInterviewState, Question_Structure, Answer_Structure, source_item_schema
 from src.prompts import (STRUCTURED_INPUT_message, ANALYST_CREATOR_PROMPT, GENERATE_QUESTIONS_PROMPT, 
            SEARCH_QUERY_EXPERT_PROMPT, EXPERT_ANSWER_PROMPT, EXPERT_RANK_SOURCES_PROMPT, CREATE_INTRO_PROMPT, 
            CREATE_BODY_AND_SOURCES_PROMPT, CREATE_LATEX_FILE_PROMPT, LATEX_REPORT_IMPROVEMENT_PROMPT)
@@ -385,14 +385,37 @@ def content_compiler(state: UserSideInput) -> dict[str,Any]:
     
     intro = intro_response.content
     
-    body_and_sources_response = model.with_structured_output(body_and_sources_struct, method = 'json_schema',strict=True).with_config(temperature = 0.8).invoke(CREATE_BODY_AND_SOURCES_PROMPT.format(convo_hist = convo_hist, intro = intro, sources_hist = sources_hist, Audience_schema = Audience_schema))
+    body_and_sources_response = model.with_config(temperature=0.5).invoke(
+        CREATE_BODY_AND_SOURCES_PROMPT.format(
+            convo_hist=convo_hist, 
+            intro=intro, 
+            sources_hist=sources_hist, 
+            Audience_schema=Audience_schema
+        )
+    )
     
-    body = body_and_sources_response.body
-    sources = body_and_sources_response.final_draft_sources
-         
-    return {'intro': intro,
-           'body': body,
-           'final_draft_sources': sources}
+    raw_content = body_and_sources_response.content
+    
+    # Parse the output using the delimiter
+    if "===FINAL_SOURCES===" in raw_content:
+        body, raw_sources = raw_content.split("===FINAL_SOURCES===")
+
+        body = body.strip()
+        
+        # Convert the sources text block into an actual Python list
+        sources_list = [
+            s.strip() for s in raw_sources.strip().split('\n') if s.strip()
+        ]
+    else:
+        # Fallback just in case the LLM forgets the delimiter
+        body = raw_content.strip()
+        sources_list = []
+
+    return {
+        'intro': intro,
+        'body': body,
+        'final_draft_sources': sources_list
+    }
 
 def latex_compiler(state: UserSideInput) -> dict[str,[]]:
     
@@ -424,10 +447,11 @@ def latex_compiler(state: UserSideInput) -> dict[str,[]]:
         formatted_improvement_prompt = LATEX_REPORT_IMPROVEMENT_PROMPT.format(Latest_error = latex_error_logs[-1],
                                                                                  history_of_errors = latex_error_logs,
                                                                                  latex_file_code = str(read_file))
-        updated_latex_code_report = model.invoke(formatted_improvement_prompt)
+        raw_latex_from_llm = model.invoke(formatted_improvement_prompt)
+        clean_latex = sanitize_latex_code(raw_latex_from_llm.content)
         
         with open(LATEX_FILE, 'w') as file:
-            read_file = file.write(updated_latex_code_report.content)
+            read_file = file.write(clean_latex)
         
         return {"messages": []}
     
@@ -440,10 +464,11 @@ def latex_compiler(state: UserSideInput) -> dict[str,[]]:
     Updated_CREATE_LATEX_FILE_PROMPT = CREATE_LATEX_FILE_PROMPT.format(intro = intro, body = body, sources = sources, 
                                                                        Audience_schema = Audience_schema, topic = topic)
     
-    latex_code_report = model.invoke(Updated_CREATE_LATEX_FILE_PROMPT)
-        
+    raw_latex_from_llm = model.invoke(Updated_CREATE_LATEX_FILE_PROMPT)
+    clean_latex = sanitize_latex_code(raw_latex_from_llm.content)
+    
     with open(LATEX_FILE,'w') as file:
-        file.write(latex_code_report.content)
+        file.write(clean_latex)
     
     return {"messages": []}
 
@@ -465,7 +490,6 @@ def latex_validator(state: UserSideInput) -> dict[str,Any]:
         res = subprocess.run(["pdflatex", 
                               "-draftmode",
                               "-interaction=nonstopmode",
-                              "-file-line-error",
                               f"-output-directory={TEMP_LATEX_VALIDATION_LOG_DIR}",
                               str(LATEX_FILE)],
             capture_output=True,
@@ -481,6 +505,9 @@ def latex_validator(state: UserSideInput) -> dict[str,Any]:
             full_error_log = res.stdout.split('\n')
             relevant_error_log = []
 
+            if 'Unknown compilation error.' in full_error_log[-1]:
+                raise Exception("Unkown Compilation error")
+            
             for i, line in enumerate(full_error_log):
                 if line.startswith('!'):
                     relevant_error_log.append(line)
@@ -488,8 +515,14 @@ def latex_validator(state: UserSideInput) -> dict[str,Any]:
                         if i + j < len(full_error_log) and not full_error_log[i + j].startswith('!'):
                             relevant_error_log.append(full_error_log[i + j])
                     relevant_error_log.append('********' * 5)
-                    
-            formatted_error = "\n".join(relevant_error_log) if relevant_error_log else "Unknown compilation error."
+
+            if not relevant_error_log:
+                fallback_log = "\n".join(full_error_log[-15:])
+                formatted_error = f"Unparsed error. Raw tail log:\n{fallback_log}"
+
+            else:
+                formatted_error = "\n".join(relevant_error_log)
+
             return {'latex_error_logs': [formatted_error],
                     'latex_error_attempts': latex_error_attempts + 1,
                     'revise_latex': True}
