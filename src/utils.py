@@ -4,6 +4,7 @@ from langchain.chat_models import init_chat_model
 from langchain_core.messages.base import BaseMessage
 from langgraph.types import interrupt
 from src.prompts import SUMMARIZATION_PROMPT
+import re
 
 model = init_chat_model(
     model= 'gpt-5-nano',
@@ -78,3 +79,29 @@ def get_interrupt_response(interrupt_payload: dict) -> [str,str]:
         )
     
     return [action,feedback] 
+
+def sanitize_latex_code(raw_llm_output: str) -> str:
+    """
+    Strips out LLM conversational chatter, markdown block quotes, 
+    and slices strictly from \\documentclass to \\end{document}.
+    #GENERATED USING GPT#
+    """
+    text = raw_llm_output.strip()
+
+    # 1. Remove markdown code blocks like ```latex ... ``` if present
+    code_block_match = re.search(r"```(?:latex)?\s*(.*?)\s*```", text, re.DOTALL | re.IGNORECASE)
+    if code_block_match:
+        text = code_block_match.group(1).strip()
+
+    # 2. Slice strictly from \documentclass to \end{document}
+    start_tag = r"\documentclass"
+    end_tag = r"\end{document}"
+
+    start_idx = text.find(start_tag)
+    end_idx = text.rfind(end_tag)
+
+    if start_idx != -1 and end_idx != -1:
+        # Extract purely the LaTeX document scope
+        text = text[start_idx : end_idx + len(end_tag)]
+
+    return text.strip()
