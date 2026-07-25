@@ -18,7 +18,7 @@ A hierarchical, multi-agent research pipeline built with [LangGraph](https://pyt
 - Future Directions
 - Acknowledgements
 
-**NOTE:** Checkout the details of tests in demo_and_tests folder, it also has the final pdfs generated across different testing settings.
+**NOTE:** Checkout the details of tests in demo_and_tests folder, it also has the final pdfs generated across different testing settings. Checkout the video of one of the execution runs: https://youtu.be/3aU622zTymY
 
 ## Architecture & Workflow
 
