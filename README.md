@@ -53,6 +53,8 @@ The architecture splits into a **parent graph** concerned with orchestration and
 *   **Local LaTeX Validation:** Requires a local LaTeX engine installation which increases environment footprint, but allows for free, unlimited, and fast compilation checks without relying on a paid external API.
 *   **Source Ranking vs. Filtering:** Currently, all sources (even `unfavourable` ones) are passed to the compiler but weighted differently. A future optimization could outright drop bad sources during the interview phase to save expert-node reasoning tokens.
 *   **State Memory:** No cross-session LangGraph `MemoryStore` is implemented yet, as the current goal is stateless, highly objective research generation rather than a personalized assistant.
+*   **Regenerate LaTeX code completely:** The original implementation is working to regenerate the code file despite the node acting as a code patcher, this uses a lot of token which can be optimized to a good extent. More details in future work section.
+  NOTE: one more thing I noticed was that since I provided a more limite latex tempelate most of the errors can be specified in prompts which can directly restrict the LLM to generate a good latex code and the fact that for the current case mostly missing $ insert in handling urls was the main issue but I still relied on full code generation since we mostly want latex tempelate flexibility time to time.
 
 
 ## Getting Started
@@ -63,18 +65,19 @@ The architecture splits into a **parent graph** concerned with orchestration and
 
 
 **environment file should look like this:**
-
+` 
 OPENAI_API_KEY='YOUR_OPEN_AI_API_KEY'
 TAVILY_API_KEY='YOUR_TAVILY_API_KEY'
-
+# go to this site to generate your git authentication token https://www.overleaf.com/user/settings
+GITHUB_TOKEN=<YOUR_GIT_INTEGRATION_TOKEN>
 **Optional for evaluation and tracing**
 LANGSMITH_API_KEY='YOUR_LANGSMITH_API_KEY'
  **set tracing to true when you set up your LangSmith account**
  LANGSMITH_TRACING=true
  LANGSMITH_PROJECT= your_project_name
-**Uncomment the following if you are on the EU instance:**
- #LANGSMITH_ENDPOINT=https://eu.api.smith.langchain.com
-
+# Uncomment the following if you are on the EU instance:**
+ # LANGSMITH_ENDPOINT=https://eu.api.smith.langchain.com 
+ `
 **Reproduce the code:**
 - clone repo -> python environment -> env file for variables ->pip install requirements.txt -> langgraph dev
 
@@ -89,3 +92,13 @@ LANGSMITH_API_KEY='YOUR_LANGSMITH_API_KEY'
 * **Heterogeneous LLM Routing:** Utilize different models (e.g., Claude 3.5 Sonnet for LaTeX coding, GPT-4o for content synthesis) based on task-specific strengths.
 
 * **Degradation Fallbacks:** Implement hierarchical fallback nodes that gracefully degrade the output (e.g., dropping LaTeX compilation and returning markdown) if API limits or terminal errors occur.
+* **Add a URL Checker:** To further optimize the context window, we can introduce a URL checker at the web_search node where we retrieve the URLs and only filter out those for which we are actually recieveing proper content since the context is currently generated with help of tavily api which uses LLM in background
+
+## Acknowledgments:
+* I took some refereneces for schema design from the langgraph foundational course.
+**Note on AI Usage:** I designed the workflow and state graphs for this project myself, but I used Gemini as a pairing partner to iron out some Bash script edge cases and clean up the Python string extraction logic.
+
+
+in refining the compilation node as well -> my approach was to use pydantic base model but output were getting noisy so gemini recommended using a raw output and parse it accordingly
+
+  
