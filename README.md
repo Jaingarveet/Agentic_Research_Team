@@ -20,7 +20,7 @@ A hierarchical, multi-agent research pipeline built with [LangGraph](https://pyt
 - Future Directions
 - Acknowledgements
 
-**NOTE:** Checkout the details of tests in demo_and_tests folder, it also has the final pdfs generated across 3 different testing settings.
+**NOTE:** Checkout the details of tests in demo_and_tests folder, it also has the final pdfs generated across different testing settings.
 
 ## Architecture & Workflow
 
@@ -60,7 +60,7 @@ The architecture splits into a **parent graph** concerned with orchestration and
 *   **State Memory:** No cross-session LangGraph `MemoryStore` is implemented yet, as the current goal is stateless, highly objective research generation rather than a personalized assistant.
 *   **Regenerate LaTeX code completely:** The original implementation is working to regenerate the code file despite the node acting as a code patcher, this uses a lot of token which can be optimized to a good extent. More details in future work section.
   NOTE: one more thing I noticed was that since I provided a more focused/strict latex template most of the errors can be specified in prompts which can directly restrict the LLM to generate a good latex code and the fact that for the current case mostly missing $ insert in handling urls was the main issue but I still relied on full code generation since we mostly want latex template flexibility time to time.
-*   **Deduplication:** The current implementation does have uniqueness in the analysts to get rid of duplicate interviewing scenarios but there are possibilties of getting duplicate contents, and moreover the current design uses `Annotated[list,add]` as a map-reducer to combine interview states but there is always a possibilty of duplication since the compilation node doesn't explicitly knows any sequence, this particular thing is where another major optimisation is possible since I am anways using an ID for each interview, though summarization middleware does wraps everything into 1 big summary after 5000 words, I still think there might be a way to fix this issue either using a validation node over compilation node or have a filtering node before any compilation happens to save multiple loops of refinement.
+* **State Deduplication & Sequence Mapping:** While the system dynamically generates unique domain analysts to prevent redundant interviews, using `Annotated[list, add]` for map-reduce state aggregation introduces a risk of content duplication. Because the global state blindly appends interview outputs, the compilation node occasionally receives overlapping content without strict sequential awareness.
 
 ## Getting Started
 ### Pre-requisites
@@ -127,7 +127,10 @@ uv run --active langgraph dev
 * **Heterogeneous LLM Routing:** Utilize different models (e.g., Claude 3.5 Sonnet for LaTeX coding, GPT-4o for content synthesis) based on task-specific strengths.
 
 * **Degradation Fallbacks:** Implement hierarchical fallback nodes that gracefully degrade the output (e.g., dropping LaTeX compilation and returning markdown) if API limits or terminal errors occur.
+
 * **Add a URL Checker:** To further optimize the context window, we can introduce a URL checker at the web_search node where we retrieve the URLs and only filter out those for which we are actually receiving proper content since the context is currently generated with help of tavily api which uses LLM in background.
+
+* **De-duplication issue:** Since every interview session generates a unique ID, transitioning the global state from a simple list to a key-value dictionary (mapped by interview ID) would act as a natural deduplication filter. Alternatively, inserting a lightweight, programmatic validation node immediately before compilation could parse these IDs and prune duplicate context, saving the LLM from wasting reasoning tokens on redundant data.
 
 ## Acknowledgments:
 * I took some refereneces for schema design from the langgraph foundational course.
