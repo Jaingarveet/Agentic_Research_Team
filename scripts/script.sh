@@ -1,30 +1,41 @@
 #!/bin/bash
+set -e  # Exit immediately if any command fails
 
-# Initialize and remove the main tex file only if git repo never existed before then clone and remove main.tex
-# all of this happens inside a repo called my-paper
+# 1. Dynamically resolve the absolute path to your project root
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PROJECT_ROOT="$( cd "$SCRIPT_DIR/.." && pwd )"
 
-# earlier I was checking the github token before executing the whole script so it will return a status code of 0 for successful run in this script since it just skips the whole commit! which later makes the commit_overleaf output misleading, also under the hood the bash scripts itself uses Exit masking so we can just use this script again and again.
+SOURCE_TEX="$PROJECT_ROOT/temp_latex_code/temp.tex"
 
-mkdir temp_git_integration
-cd temp_git_integration
+# 2. Check that source tex file actually exists before proceeding
+if [ ! -f "$SOURCE_TEX" ]; then
+    echo "Error: Source file $SOURCE_TEX does not exist!"
+    exit 1
+fi
 
+# 3. Create a isolated temp directory and auto-delete it on exit
+TEMP_DIR=$(mktemp -d)
+trap 'rm -rf "$TEMP_DIR"' EXIT
+
+cd "$TEMP_DIR"
+
+echo "***** Initializing isolated sync repo *****"
 git init
-git remote add overleaf https://git@git.overleaf.com/<YOUR-PROJECT-CODE>
 
-echo "***** Midpoint in the commit ******"
-    
+# Add your project code here 
+
+git remote add overleaf https://git@git.overleaf.com/6a54b3bee47f13f9a65e8ee2
 git checkout -B main
+
+# Pull existing Overleaf files into temp folder
 git pull overleaf main --allow-unrelated-histories --rebase=false || true
-# --allow-unrelated-histories --rebase=false for first initialization but doesn't matter since we can run this again without major overlap
 
-touch main.tex
+# Copy temp.tex over main.tex in the isolated temp folder
+cp "$SOURCE_TEX" main.tex
 
-cp ../temp_latex_code/temp.tex main.tex
-# temp.tex is garauanteed to be written since we run this in docker container where directories are usually writable permitted
-echo "***** Midpoint 2 in the commit ******"
-
+echo "***** Staging and committing main.tex *****"
 git add main.tex
 git commit -m "successfully updated the repo with new content"
 git push --set-upstream overleaf main
 
-echo "***** Ending the commit ******"
+echo "***** Ending the commit *****"
