@@ -24,7 +24,7 @@ git init
 
 # Add your project code here 
 
-git remote add overleaf https://git@git.overleaf.com/6a54b3bee47f13f9a65e8ee2
+git remote add overleaf https://git@git.overleaf.com/<your project code goes here>
 git checkout -B main
 
 # Pull existing Overleaf files into temp folder
