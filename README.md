@@ -132,9 +132,9 @@ uv run --active langgraph dev
 
 ## Acknowledgments:
 * I took some refereneces for schema design from the langgraph foundational course.
-* **Note on AI Usage:** I designed the workflow and state graphs for this project myself, but I used Gemini as a pairing partner to iron out some Bash script edge cases and clean up the Python string extraction logic.
-* **Additonal AI usage includes:** In refining the compilation node as well -> my approach was to use pydantic base model but output were getting noisy so gemini recommended using a raw output and suggested to parse it accordingly.
-
+* **Note on AI Usage:** I designed the workflow and state graphs for this project myself, but I used Gemini-Flash(extended) as a pairing partner to iron out some Bash script edge cases and clean up the Python string extraction logic.
+* **Additonal AI usage includes:** In refining the compilation node as well -> my approach was to use pydantic base model but output were getting noisy so Gemini-Flash(extended) recommended using a raw output and suggested to parse it accordingly.
+* **Additonal AI usage includes:** In structuring the README and proper proper presentation of the project I have taken assistance of Gemini-Flash(extended).
 
 `This project focuses on engineering patterns for agentic systems rather than building a production-ready research platform. Many design decisions were made to explore reliability, debugging, and workflow control within a limited development timeframe.`
 
