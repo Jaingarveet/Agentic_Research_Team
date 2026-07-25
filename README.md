@@ -10,8 +10,6 @@ A hierarchical, multi-agent research pipeline built with [LangGraph](https://pyt
   <img width="1117" height="1408" alt="image" src="https://github.com/user-attachments/assets/5fea1390-d077-4b49-bd3a-325ffd5a77d5" />
 </p>
 
-
-
 ## Table of Contents
 - Architecture & Workflow
 - Key Technical Highlights
@@ -139,3 +137,7 @@ uv run --active langgraph dev
 
 
 `This project focuses on engineering patterns for agentic systems rather than building a production-ready research platform. Many design decisions were made to explore reliability, debugging, and workflow control within a limited development timeframe.`
+
+`Hi, at time of developing this project I am a student at uppsala university of graduating in 2027, my name is Garveet Jain and here are my credentials:
+linkedin: www.linkedin.com/in/garveetjain/ 
+github: https://github.com/Jaingarveet`
