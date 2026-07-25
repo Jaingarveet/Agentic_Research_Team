@@ -161,8 +161,14 @@ CRITICAL AUDIENCE ADAPTATION RULES:
 - If Knowledge is LOW: Explain concepts from first principles; avoid unexplained jargon.
 
 FINAL OUTPUT REQUIREMENT:
-You must also output a separate 'final_draft_sources' list. This list must ONLY contain the sources you actually cited in the body. Format each item exactly like this:
-Title of Source :: Source_Quality_Rank :: URL
+You must output the report and the sources in plain text, separated EXACTLY by the delimiter "===FINAL_SOURCES===". 
+
+Format your response exactly like this:
+<Write the complete, comprehensive body of the report here, weaving in the facts and inline citations>
+
+===FINAL_SOURCES===
+Title of Source 1 :: Source_Quality_Rank :: URL
+Title of Source 2 :: Source_Quality_Rank :: URL
 """
 
 
@@ -269,11 +275,12 @@ EXPLICIT_INSTRUCTIONS:
     ** INTRODUCTION AND RELATED SECTIONS ARE ALREADY SELF-EXPLANATORY, USE PROPERLY DIVIDED SUBSECTIONS THOUGH THE PROVIDED BODY SHOULD ALREADY BE FOLLOWING THAT FORMAT, MAKE SURE TO BE AS CLEAN AND PRECISE AS POSSIBLE.
     ** Content: Replace all template placeholders with the provided summary text, structuring it purely with \section and \subsection tags.
     ** Convert the provided sources into \bibitem{{key}} bibliography entries and insert matching \cite{{key}} markers seamlessly into the prose.
+    ** Please don't try to give ids to different sections since that is already handled by latex when we create subsections and sections
+    ** Do NOT include any introduction, explanations, notes, or markdown code blocks (```).
+    ** Your entire response must start immediately with documentclass and end with end document of latex format.
     
     NOTE: 
     ** You are not allowed to change the internal contents and wordings you will be provided, just try to create the code in executable format that can be directly uploaded to overleaf to compile. 
-    
-    CRITICAL: ** Following is the information for the targeted audience of this report, please try to use this information strictly to refine your output: {Audience_schema}
 """
 
 LATEX_REPORT_IMPROVEMENT_PROMPT = """
@@ -292,4 +299,85 @@ EXPLICIT_INSTRUCTIONS:
     CRITICAL: 
     ** Your task is to acts as a code patching tool which will only modify the things in the file where there are errors. 
     ** Remember that the file is stored in a (.tex) format.
+    ** Please don't modify/remove any additional contents from the latex code, only try to regenerate the error related things.
+    ** Based on the error related things generate the full latex code without chaning the non-error patches within the code.
+    ** If the latest error logs doesn't show any specific errors, and only show errors like unkown compilation error or something similar then regenerate the same 
+    code file again without changing anything. 
+    ** Please don't try to give ids to different sections since that is already handled by latex when we create subsections and sections
+    ** Do NOT include any introduction, explanations, notes, or markdown code blocks (```).
+    ** Your entire response must start immediately with documentclass and end with end document of latex format.
+""" + r"""
+
+**************************** LATEX TEMPLATE YOU SHOULD BE FOLLOWING: ****************************
+\documentclass{{article}}  
+
+\usepackage[english]{{babel}}
+
+\usepackage[letterpaper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{{geometry}}
+
+\usepackage{{amsmath}}
+\usepackage{{graphicx}}
+\usepackage[colorlinks=true, allcolors=blue]{{hyperref}}
+
+\title{{Your Paper}}
+\author{{You}}
+
+\begin{{document}}
+\maketitle
+
+\section{{Introduction}}
+
+Your introduction goes here! Simply start writing your document.
+
+\section{{}}
+
+\subsection{{}}
+
+Simply use the section and subsection commands, as in this example document! 
+
+\subsection{{How to add Tables}}
+
+Use the table and tabular environments for basic tables --- see Table~\ref{{tab:widgets}}, for example. 
+
+
+\subsection{{How to add Lists}}
+
+You can make lists with automatic numbering \dots
+
+\begin{{enumerate}}
+\item Like this,
+\item and like this.
+\end{{enumerate}}
+\dots or bullet points \dots
+\begin{{itemize}}
+\item Like this,
+\item and like this.
+\end{{itemize}}
+
+\subsection{{How to write Mathematics}}
+
+\LaTeX{{}} is great at typesetting mathematics. Let $X_1, X_2, \ldots, X_n$ be a sequence of independent and identically distributed random variables with $\text{{E}}[X_i] = \mu$ and $\text{{Var}}[X_i] = \sigma^2 < \infty$, and let
+\[S_n = \frac{{X_1 + X_2 + \cdots + X_n}}{{n}}
+      = \frac{{1}}{{n}}\sum_{{i}}^{{n}} X_i\]
+denote their mean. Then as $n$ approaches infinity, the random variables $\sqrt{{n}}(S_n - \mu)$ converge in distribution to a normal $\mathcal{{N}}(0, \sigma^2)$.
+
+
+\subsection{{How to add Citations and a References List}}
+
+Here is a sentence where I want to cite my first source \cite{{smith2023}}. And here is another point that needs a different citation \cite{{jones2024}}.
+
+
+\begin{{thebibliography}}{{99}}
+
+\bibitem{{smith2023}}
+Smith, J. (2023). \textit{{A great book on LaTeX}}. Tech Publisher.
+
+\bibitem{{jones2024}}
+Jones, M., \& Doe, A. (2024). "Why manual citations are sometimes faster." \textit{{Journal of Typesetting}}, 12(3), 45-60.
+
+\end{{thebibliography}}
+
+\end{{document}}
+
+**************************** LATEX TEMPELATE ENDS HERE ****************************
 """
