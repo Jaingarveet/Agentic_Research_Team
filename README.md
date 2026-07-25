@@ -2,7 +2,7 @@
 
 A hierarchical, multi-agent research pipeline built with [LangGraph](https://python.langchain.com/docs/langgraph). This system dynamically provisions parallel AI analysts to research a topic, conduct simulated expert interviews, compile a comprehensive technical report, and self-heal LaTeX compilation errors before deterministically committing the final paper to Overleaf.
 
-**My main motivation for this project was to do a case study in AI Platform Engineering and an attempt to make agentic workflows as deterministic as possible with minimal user interaction.**
+**My main motivation for this project was to do a case study in AI Platform Engineering and an attempt to make agentic workflows as deterministic as possible with minimal user interaction. The goal was not to create a fully autonomous research system, but to experiment with designing controllable, modular, and fault-tolerant LLM pipelines with minimal user intervention.**
 
 **KEYWORDS:**  parallel sub-graphs, self-healing loop, human-in-the loop checkpoints, dynamic summarization middleware, retry policies, audience modelling, conditional re-routing and web_search funcitonality.
 
@@ -133,3 +133,6 @@ uv run --active langgraph dev
 * I took some refereneces for schema design from the langgraph foundational course.
 * **Note on AI Usage:** I designed the workflow and state graphs for this project myself, but I used Gemini as a pairing partner to iron out some Bash script edge cases and clean up the Python string extraction logic.
 * **Additonal AI usage includes:** In refining the compilation node as well -> my approach was to use pydantic base model but output were getting noisy so gemini recommended using a raw output and suggested to parse it accordingly.
+
+
+`This project focuses on engineering patterns for agentic systems rather than building a production-ready research platform. Many design decisions were made to explore reliability, debugging, and workflow control within a limited development timeframe.`
