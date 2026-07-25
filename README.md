@@ -24,9 +24,9 @@ A hierarchical, multi-agent research pipeline built with [LangGraph](https://pyt
 
 ## Architecture & Workflow
 
-The architecture splits into a **parent graph** concerned with orchestration and compilation of the research and multiple parallel **sub-graph** concerened with targeted research.
+The architecture splits into a **parent graph** concerned with orchestration and compilation of the research and multiple parallel **sub-graphs** concerned with targeted research.
 
-### 1. Prepartion Phase
+### 1. Preparation Phase
 * **Input Structuring:** Accepts raw user prompt about the topic and optional target audience details(defaults applied via Pydantic). Sets max number of analysts to a default value of 4.
 * **Analyst Generation:** Uses an analyst schema to dynamically generate unique domain-specific analysts based on the topic.
 * **Human-in-the-Loop (HITL):** Uses LangGraph interrupts and conditional routing to pause execution. The user can optionally review and provide feedback to revise the analyst team before parallel execution begins.
@@ -59,8 +59,8 @@ The architecture splits into a **parent graph** concerned with orchestration and
 *   **Source Ranking vs. Filtering:** Currently, all sources (even `unfavourable` ones) are passed to the compiler but weighted differently. A future optimization could outright drop bad sources during the interview phase to save expert-node reasoning tokens.
 *   **State Memory:** No cross-session LangGraph `MemoryStore` is implemented yet, as the current goal is stateless, highly objective research generation rather than a personalized assistant.
 *   **Regenerate LaTeX code completely:** The original implementation is working to regenerate the code file despite the node acting as a code patcher, this uses a lot of token which can be optimized to a good extent. More details in future work section.
-  NOTE: one more thing I noticed was that since I provided a more focused/strict latex tempelate most of the errors can be specified in prompts which can directly restrict the LLM to generate a good latex code and the fact that for the current case mostly missing $ insert in handling urls was the main issue but I still relied on full code generation since we mostly want latex tempelate flexibility time to time.
-
+  NOTE: one more thing I noticed was that since I provided a more focused/strict latex template most of the errors can be specified in prompts which can directly restrict the LLM to generate a good latex code and the fact that for the current case mostly missing $ insert in handling urls was the main issue but I still relied on full code generation since we mostly want latex template flexibility time to time.
+*   **Deduplication:** The current implementation does have uniqueness in the analysts to get rid of duplicate interviewing scenarios but there are possibilties of getting duplicate contents, and moreover the current design uses `Annotated[list,add]` as a map-reducer to combine interview states but there is always a possibilty of duplication since the compilation node doesn't explicitly knows any sequence, this particular thing is where another major optimisation is possible since I am anways using an ID for each interview, though summarization middleware does wraps everything into 1 big summary after 5000 words, I still think there might be a way to fix this issue either using a validation node over compilation node or have a filtering node before any compilation happens to save multiple loops of refinement.
 
 ## Getting Started
 ### Pre-requisites
@@ -79,7 +79,7 @@ cd Agentic_research_team
 ```
 `NOTE: (Optional) Deactivate any active base environment.`
 
-3. Create a `.env` file in the project root.
+2. Create a `.env` file in the project root.
 
 ```env
 OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
@@ -95,14 +95,14 @@ LANGSMITH_TRACING=true
 LANGSMITH_PROJECT="your_project_name"
 # LANGSMITH_ENDPOINT=https://eu.api.smith.langchain.com
 ```
-4. Remove `.env.example` (present in root directory(Agentic_Research_Team)).
+3. Remove `.env.example` (present in root directory(Agentic_Research_Team)).
 
 ```bash
 rm .env.example
 ```
-5. Update the Overleaf project ID in the script under `scripts/`.
+4. Update the Overleaf project ID in the script under `scripts/`.
 
-6. Install dependencies and start LangGraph.
+5. Install dependencies and start LangGraph.
 `NOTE: this step is to be done in root repository!`
 ```bash
 uv sync
@@ -114,7 +114,7 @@ uv run --active langgraph dev
 - **Environment variables not loading:** Ensure the file is named `.env` and remove `.env.example`.
 - **Overleaf sync issues:** Verify your Git integration token and the project ID configured in `scripts/`.
 - **LaTeX errors:** Ensure `pdflatex` is installed and available in your `PATH`.
-- **Version mismatch:** There can be a possiblity of mismatch between pydantic versions or Typeddict importing syntax depending on which python version you run, for that case I would recommend using python versions around 3.11.
+- **Version mismatch:** There can be a possibility of mismatch between pydantic versions or Typeddict importing syntax depending on which python version you run, for that case I would recommend using python versions around 3.11.
 - **Warnings:** If anyone is running this kind of project for first time then I would definitely try to ignore the pydantic deserializing warning initially since it is just a deserialzing issue when we recieve an empty/none value in state where we have define a strict schema.
 
 ## Future Directions
@@ -127,7 +127,7 @@ uv run --active langgraph dev
 * **Heterogeneous LLM Routing:** Utilize different models (e.g., Claude 3.5 Sonnet for LaTeX coding, GPT-4o for content synthesis) based on task-specific strengths.
 
 * **Degradation Fallbacks:** Implement hierarchical fallback nodes that gracefully degrade the output (e.g., dropping LaTeX compilation and returning markdown) if API limits or terminal errors occur.
-* **Add a URL Checker:** To further optimize the context window, we can introduce a URL checker at the web_search node where we retrieve the URLs and only filter out those for which we are actually recieveing proper content since the context is currently generated with help of tavily api which uses LLM in background.
+* **Add a URL Checker:** To further optimize the context window, we can introduce a URL checker at the web_search node where we retrieve the URLs and only filter out those for which we are actually receiving proper content since the context is currently generated with help of tavily api which uses LLM in background.
 
 ## Acknowledgments:
 * I took some refereneces for schema design from the langgraph foundational course.
