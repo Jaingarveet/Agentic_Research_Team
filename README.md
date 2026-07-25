@@ -7,15 +7,15 @@ A hierarchical, multi-agent research pipeline built with [LangGraph](https://pyt
 **KEYWORDS:**  parallel sub-graphs, self-healing loop, human-in-the loop checkpoints, dynamic summarization middleware, retry policies, audience modelling, conditional re-routing and web_search funcitonality.
 
 <p align="center">
-  <img width="600" alt="LangGraph Architecture Diagram" src="https://github.com/user-attachments/assets/25e92393-95cb-4928-8e9d-cc96d981bb20" />
+  <img width="373" height="469" alt="Final graph photo asthetic 2" src="https://github.com/user-attachments/assets/bdf4dda9-7d20-4fd4-94d2-289523374818" />
 </p>
 
 ## Table of Contents
-- [Architecture & Workflow](#-architecture--workflow)
-- [Key Technical Highlights](#-key-technical-highlights)
-- [Design Trade-offs](#-design-trade-offs)
-- [Getting Started](#-getting-started)
-- [Future Directions](#-future-directions)
+- Architecture & Workflow
+- Key Technical Highlights
+- Design Trade-offs
+- Getting Started
+- Future Directions
 
 ## Architecture & Workflow
 
@@ -41,9 +41,9 @@ The architecture splits into a **parent graph** concerned with orchestration and
 
 ## Key Technical Highlights
 
-*   **Average Completion Time:** `[Insert Time]`
-*   **Average Cost / Token Efficiency:** `[Insert Cost ~$0.15 / 85k tokens per run]`
-*   **Map-Reduce Architecture:** Utilizes LangGraph's `Send` API to dynamically spawn an arbitrary number of domain-specific analysts that operate completely in parallel.
+*   **Average Completion Time:** 10 mins `(the only thing varies is how long does user takes to respond and the number of time we refine with HITL feedback in analyst creation or the latex validation towards the end)`
+*   **Average Cost / Token Efficiency:** $0.085 /350-400k tokens per run `Only used gpt-5-nano for the whole architecture`
+*    **Map-Reduce Architecture:** Utilizes LangGraph's `Send` API to dynamically spawn an arbitrary number of domain-specific analysts that operate completely in parallel.
 *   **Self-Healing Code Compilation:** Automated conditional routing checks LaTeX compilation logs, filtering out raw stdout noise to feed the LLM isolated failure lines—drastically saving reasoning tokens.
 *   **Robust Retry Policies:** Custom retry handlers tailored exclusively for network drops, API timeouts, and OpenAI/Tavily rate limits, preventing pipeline collapse during high-concurrency map-reduce phases.
 *   **Hierarchical State Management:** Sub-graphs maintain isolated local states. This prevents the compounding state bloat that typically plagues complex LangGraph applications.
@@ -54,33 +54,63 @@ The architecture splits into a **parent graph** concerned with orchestration and
 *   **Source Ranking vs. Filtering:** Currently, all sources (even `unfavourable` ones) are passed to the compiler but weighted differently. A future optimization could outright drop bad sources during the interview phase to save expert-node reasoning tokens.
 *   **State Memory:** No cross-session LangGraph `MemoryStore` is implemented yet, as the current goal is stateless, highly objective research generation rather than a personalized assistant.
 *   **Regenerate LaTeX code completely:** The original implementation is working to regenerate the code file despite the node acting as a code patcher, this uses a lot of token which can be optimized to a good extent. More details in future work section.
-  NOTE: one more thing I noticed was that since I provided a more limite latex tempelate most of the errors can be specified in prompts which can directly restrict the LLM to generate a good latex code and the fact that for the current case mostly missing $ insert in handling urls was the main issue but I still relied on full code generation since we mostly want latex tempelate flexibility time to time.
+  NOTE: one more thing I noticed was that since I provided a more focused/strict latex tempelate most of the errors can be specified in prompts which can directly restrict the LLM to generate a good latex code and the fact that for the current case mostly missing $ insert in handling urls was the main issue but I still relied on full code generation since we mostly want latex tempelate flexibility time to time.
 
 
 ## Getting Started
 ### Pre-requisites
 *   Python 3.10+
 *   A local LaTeX distribution (e.g., TeX Live, MacTeX, or MiKTeX) for `pdflatex` validation.
-*   An Overleaf account with Git integration enabled.
+*   `uv`
+*   An Overleaf project with Git integration enabled.
 
+## Setup
 
-**environment file should look like this:**
-` 
-OPENAI_API_KEY='YOUR_OPEN_AI_API_KEY'
-TAVILY_API_KEY='YOUR_TAVILY_API_KEY'
-# go to this site to generate your git authentication token https://www.overleaf.com/user/settings
-GITHUB_TOKEN=<YOUR_GIT_INTEGRATION_TOKEN>
-**Optional for evaluation and tracing**
-LANGSMITH_API_KEY='YOUR_LANGSMITH_API_KEY'
- **set tracing to true when you set up your LangSmith account**
- LANGSMITH_TRACING=true
- LANGSMITH_PROJECT= your_project_name
-# Uncomment the following if you are on the EU instance:**
- # LANGSMITH_ENDPOINT=https://eu.api.smith.langchain.com 
- `
-**Reproduce the code:**
-- clone repo -> python environment -> env file for variables ->pip install requirements.txt -> langgraph dev
+1. Clone the repository.
 
+```bash
+git clone https://github.com/Jaingarveet/Agentic_Research_Team.git
+cd Agentic_research_team
+```
+`NOTE: (Optional) Deactivate any active base environment.`
+
+3. Create a `.env` file in the project root.
+
+```env
+OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
+TAVILY_API_KEY="YOUR_TAVILY_API_KEY"
+
+# Generate your Overleaf Git token at:
+# https://www.overleaf.com/user/settings
+GITHUB_TOKEN="YOUR_OVERLEAF_GIT_TOKEN"
+
+# Optional: LangSmith
+LANGSMITH_API_KEY="YOUR_LANGSMITH_API_KEY"
+LANGSMITH_TRACING=true
+LANGSMITH_PROJECT="your_project_name"
+# LANGSMITH_ENDPOINT=https://eu.api.smith.langchain.com
+```
+4. Remove `.env.example` (present in root directory(Agentic_Research_Team)).
+
+```bash
+rm .env.example
+```
+5. Update the Overleaf project ID in the script under `scripts/`.
+
+6. Install dependencies and start LangGraph.
+`NOTE: this step is to be done in root repository!`
+```bash
+uv sync
+source .venv/bin/activate
+uv run --active langgraph dev
+```
+## Troubleshooting
+
+- **Environment variables not loading:** Ensure the file is named `.env` and remove `.env.example`.
+- **Overleaf sync issues:** Verify your Git integration token and the project ID configured in `scripts/`.
+- **LaTeX errors:** Ensure `pdflatex` is installed and available in your `PATH`.
+- **Version mismatch:** There can be a possiblity of mismatch between pydantic versions or Typeddict importing syntax depending on which python version you run, for that case I would recommend using python versions around 3.11.
+- **Warnings:** If anyone is running this kind of project for first time then I would definitely try to ignore the pydantic deserializing warning initially since it is just a deserialzing issue when we recieve an empty/none value in state where we have define a strict schema.
 
 ## Future Directions
 * **Adversarial Multi-Agent Verification (Agentic GANs):** Introduce a dedicated adversarial "Critic" node. Instead of linear synthesis, the Analyst (Generator) and Critic (Discriminator) will engage in a closed-loop debate. Claims that fail the Critic's stress test are dropped before reaching the global compiler, theoretically driving hallucination rates to zero.
@@ -92,13 +122,9 @@ LANGSMITH_API_KEY='YOUR_LANGSMITH_API_KEY'
 * **Heterogeneous LLM Routing:** Utilize different models (e.g., Claude 3.5 Sonnet for LaTeX coding, GPT-4o for content synthesis) based on task-specific strengths.
 
 * **Degradation Fallbacks:** Implement hierarchical fallback nodes that gracefully degrade the output (e.g., dropping LaTeX compilation and returning markdown) if API limits or terminal errors occur.
-* **Add a URL Checker:** To further optimize the context window, we can introduce a URL checker at the web_search node where we retrieve the URLs and only filter out those for which we are actually recieveing proper content since the context is currently generated with help of tavily api which uses LLM in background
+* **Add a URL Checker:** To further optimize the context window, we can introduce a URL checker at the web_search node where we retrieve the URLs and only filter out those for which we are actually recieveing proper content since the context is currently generated with help of tavily api which uses LLM in background.
 
 ## Acknowledgments:
 * I took some refereneces for schema design from the langgraph foundational course.
 **Note on AI Usage:** I designed the workflow and state graphs for this project myself, but I used Gemini as a pairing partner to iron out some Bash script edge cases and clean up the Python string extraction logic.
-
-
-in refining the compilation node as well -> my approach was to use pydantic base model but output were getting noisy so gemini recommended using a raw output and parse it accordingly
-
-  
+**Additonal AI usage includes:** In refining the compilation node as well -> my approach was to use pydantic base model but output were getting noisy so gemini recommended using a raw output and suggested to parse it accordingly.
