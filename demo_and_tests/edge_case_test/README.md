@@ -6,12 +6,12 @@ This directory contains artifacts and screenshots from an edge case execution of
 `INPUT TOPIC: Correlation Between Attention Span and Mental Health Issues: A 2026 Synthesis for a Broad Audience`
 
 The run demonstrates:
-- Dynamic analyst generation
-- Parallel multi-agent research execution
-- LangGraph state management and reducers
-- Expert interview workflows
-- LaTeX generation and self-healing validation
-- Final report compilation pipeline
+The major edge cases that are still there in multi-agentic pipelines.
+`NOTE: The output generated in this case contains an edge case which might be addressed in future works`
+* **State Deduplication & Sequence Mapping:** While the system dynamically generates unique domain analysts to prevent redundant interviews, using `Annotated[list, add]` for map-reduce state aggregation introduces a risk of content duplication. Because the global state blindly appends interview outputs, the compilation node occasionally receives overlapping content without strict sequential awareness.
+* Sections 4, 6, 8, and 10 are identical duplicate text ("A practical, implementable harmonization and integration plan").
+* Sections 5, 7, and 9 are identical duplicate text ("Practical implications: concrete recommendations...").
+* **Possible solution:** Since every interview session generates a unique ID, transitioning the global state from a simple list to a key-value dictionary (mapped by interview ID) would act as a natural deduplication filter. Alternatively, inserting a lightweight, programmatic validation node immediately before compilation could parse these IDs and prune duplicate context, saving the LLM from wasting reasoning tokens on redundant data.
 
 ---
 
@@ -76,8 +76,4 @@ The screenshot below shows the validation loop successfully detecting and resolv
 
 ## 5. Generated Output
 
-The final generated technical report from this run can be found as output_1 in test_1
-`NOTE: The output generated in this case contains an edge case which might be addressed in future works`
-* **State Deduplication & Sequence Mapping:** While the system dynamically generates unique domain analysts to prevent redundant interviews, using `Annotated[list, add]` for map-reduce state aggregation introduces a risk of content duplication. Because the global state blindly appends interview outputs, the compilation node occasionally receives overlapping content without strict sequential awareness.
-* Sections 4, 6, 8, and 10 are identical duplicate text ("A practical, implementable harmonization and integration plan").
-* Sections 5, 7, and 9 are identical duplicate text ("Practical implications: concrete recommendations...").
+The final generated technical report from this run can be found as duplication_issue.pdf in edge_case_test
