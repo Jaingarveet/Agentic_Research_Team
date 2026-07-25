@@ -7,8 +7,10 @@ A hierarchical, multi-agent research pipeline built with [LangGraph](https://pyt
 **KEYWORDS:**  parallel sub-graphs, self-healing loop, human-in-the loop checkpoints, dynamic summarization middleware, retry policies, audience modelling, conditional re-routing and web_search funcitonality.
 
 <p align="center">
-  <img width="373" height="469" alt="Final graph photo asthetic 2" src="https://github.com/user-attachments/assets/bdf4dda9-7d20-4fd4-94d2-289523374818" />
+  <img width="1117" height="1408" alt="image" src="https://github.com/user-attachments/assets/5fea1390-d077-4b49-bd3a-325ffd5a77d5" />
 </p>
+
+
 
 ## Table of Contents
 - Architecture & Workflow
@@ -16,6 +18,9 @@ A hierarchical, multi-agent research pipeline built with [LangGraph](https://pyt
 - Design Trade-offs
 - Getting Started
 - Future Directions
+- Acknowledgements
+
+**NOTE:** Checkout the details of tests in demo_and_tests folder, it also has the final pdfs generated across 3 different testing settings.
 
 ## Architecture & Workflow
 
@@ -126,5 +131,5 @@ uv run --active langgraph dev
 
 ## Acknowledgments:
 * I took some refereneces for schema design from the langgraph foundational course.
-**Note on AI Usage:** I designed the workflow and state graphs for this project myself, but I used Gemini as a pairing partner to iron out some Bash script edge cases and clean up the Python string extraction logic.
-**Additonal AI usage includes:** In refining the compilation node as well -> my approach was to use pydantic base model but output were getting noisy so gemini recommended using a raw output and suggested to parse it accordingly.
+* **Note on AI Usage:** I designed the workflow and state graphs for this project myself, but I used Gemini as a pairing partner to iron out some Bash script edge cases and clean up the Python string extraction logic.
+* **Additonal AI usage includes:** In refining the compilation node as well -> my approach was to use pydantic base model but output were getting noisy so gemini recommended using a raw output and suggested to parse it accordingly.
