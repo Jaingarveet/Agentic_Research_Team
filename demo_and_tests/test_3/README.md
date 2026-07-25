@@ -25,6 +25,6 @@ Key observations:
 
 ## 2. Generated Output
 
-The final generated technical report from this run can be found as output_3 in test_3
+The final generated technical report from this run can be found as output_1 in test_1
 
 
