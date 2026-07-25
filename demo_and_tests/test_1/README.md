@@ -5,7 +5,7 @@ This directory contains artifacts and screenshots from the second successful exe
 `INPUT TOPIC: Generative AI and Foundation Models in De Novo Protein Design: Regulatory Hurdles, Structural Validation, and Clinical Translation Pathways`
 
 For this run I directly created a video to demonstrate a better proof of work, link can be found below:
-
+https://youtu.be/3aU622zTymY
 
 ---
 
