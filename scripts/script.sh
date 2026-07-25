@@ -5,8 +5,8 @@
 
 # earlier I was checking the github token before executing the whole script so it will return a status code of 0 for successful run in this script since it just skips the whole commit! which later makes the commit_overleaf output misleading, also under the hood the bash scripts itself uses Exit masking so we can just use this script again and again.
 
-mkdir ../temp_git_integration
-cd ../temp_git_integration
+mkdir temp_git_integration
+cd temp_git_integration
 
 git init
 git remote add overleaf https://git@git.overleaf.com/<YOUR-PROJECT-CODE>
