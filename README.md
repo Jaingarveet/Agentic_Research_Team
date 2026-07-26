@@ -130,6 +130,8 @@ uv run --active langgraph dev
 
 * **De-duplication issue:** Since every interview session generates a unique ID, transitioning the global state from a simple list to a key-value dictionary (mapped by interview ID) would act as a natural deduplication filter. Alternatively, inserting a lightweight, programmatic validation node immediately before compilation could parse these IDs and prune duplicate context, saving the LLM from wasting reasoning tokens on redundant data.
 
+* **Containerized LaTeX Runtime:** Package `pdflatex` and environment dependencies into a minimal Docker container to eliminate host-level setup and guarantee 100% cross-platform reproducibility.
+
 ## Acknowledgments:
 * I took some refereneces for schema design from the langgraph foundational course.
 * **Note on AI Usage:** I designed the workflow and state graphs for this project myself, but I used Gemini-Flash(extended) as a pairing partner to iron out some Bash script edge cases and clean up the Python string extraction logic.
