@@ -138,7 +138,7 @@ uv run --active langgraph dev
 * **Additonal AI usage includes:** In refining the compilation node as well -> my approach was to use pydantic base model but output were getting noisy so Gemini-Flash(extended) recommended using a raw output and suggested to parse it accordingly.
 * **Additonal AI usage includes:** In structuring the README and proper proper presentation of the project I have taken assistance of Gemini-Flash(extended).
 
-`This project focuses on engineering patterns for agentic systems rather than building a production-ready research platform. Many design decisions were made to explore reliability, debugging, and workflow control within a limited development timeframe.`
+`This project focuses on engineering patterns for agentic systems rather than building a production-ready research platform. Many design decisions were made to explore reliability, debugging, and workflow control within a limited development timeframe. (20 days)`
 
 `Hi, at time of developing this project I am a student at uppsala university of graduating in 2027, my name is Garveet Jain and here are my credentials:
 linkedin: www.linkedin.com/in/garveetjain/ 
