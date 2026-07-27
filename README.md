@@ -4,6 +4,11 @@ A hierarchical, multi-agent research pipeline built with [LangGraph](https://pyt
 
 **My main motivation for this project was to do a case study in AI Platform Engineering and an attempt to make agentic workflows as deterministic as possible with minimal user interaction. The goal was not to create a fully autonomous research system, but to experiment with designing controllable, modular, and fault-tolerant LLM pipelines with minimal user intervention.**
 
+![Python](https://img.shields.io/badge/Python-3.11-blue)
+![LangGraph](https://img.shields.io/badge/LangGraph-Orchestration-success)
+![OpenAI](https://img.shields.io/badge/OpenAI-gpt--5--nano-412991)
+![License](https://img.shields.io/badge/License-Apache%202.0-green)
+
 **KEYWORDS:**  parallel sub-graphs, self-healing loop, human-in-the loop checkpoints, dynamic summarization middleware, retry policies, audience modelling, conditional re-routing and web_search funcitonality.
 
 <p align="center">
@@ -31,9 +36,9 @@ The architecture splits into a **parent graph** concerned with orchestration and
 
 ### 2. Research Phase (Parallel Sub-Graphs): 
 *   **Dynamic Interviews:** Each analyst generates detailed questions for an expert using conversation history and their specific domain instructions. 
-*   **Context Management Middleware:** If an interview exceeds 5,000 words, a dynamic summarization middleware steps in to compress the context, preventing context-window overflow and reducing token drift.
-*   **Expert Search & Query Optimization:** To maintain legitimacy, the "Expert" generates a detailed search query to inform their answer. A specialized node dynamically modifies and trims the query to comply with Tavily Search API character limits (< 400 characters).
-*   **Source Ranking:** The Expert answers the analyst, providing URLs, and explicitly ranks the retrieved context as `good`, `moderate`, or `unfavourable` to combat hallucination.
+*   **Context Management Middleware:** If an interview exceeds 5,000 words, a dynamic summarization middleware compresses older conversation history, preventing context-window overflow and reducing token drift.
+*   **Expert Search & Query Optimization:** To improve factual grounding, the "Expert" generates a detailed search query to inform their answer. A specialized node dynamically modifies and trims the query to comply with Tavily Search API character limits (< 400 characters).
+*   **Source Ranking:** The Expert answers the analyst, providing URLs, and explicitly ranks the retrieved context as `good`, `moderate`, or `unfavourable` to improve source quality assessment.
 *   **State Reducers:** Upon interview conclusion (max 5 turns or a concluding "thank you"), resources and conversation histories are passed back to the global state using LangGraph reducers (`Annotated[list, add]`).
 
 ### 3. Compilation Phase
@@ -44,10 +49,10 @@ The architecture splits into a **parent graph** concerned with orchestration and
 
 ## Key Technical Highlights
 
-*   **Average Completion Time:** 10 mins `(the only thing varies is how long does user takes to respond and the number of time we refine with HITL feedback in analyst creation or the latex validation towards the end)`
-*   **Average Cost / Token Efficiency:** $0.085 /350-400k tokens per run `Only used gpt-5-nano for the whole architecture`
+*   **Average Completion Time:** ~10 minutes `(depending on user response time, the number of HITL revision cycles, and any LaTeX refinement iterations).`
+*   **Average Cost / Token Efficiency:** $0.085 /350-400k tokens per run `Entire pipeline executed using gpt-5-nano.`
 *    **Map-Reduce Architecture:** Utilizes LangGraph's `Send` API to dynamically spawn an arbitrary number of domain-specific analysts that operate completely in parallel.
-*   **Self-Healing Code Compilation:** Automated conditional routing checks LaTeX compilation logs, filtering out raw stdout noise to feed the LLM isolated failure lines—drastically saving reasoning tokens.
+*   **Self-Healing Code Compilation:** Automated conditional routing checks LaTeX compilation logs, filtering out raw stdout noise to feed the LLM isolated failure lines—reducing reasoning token usage.
 *   **Robust Retry Policies:** Custom retry handlers tailored exclusively for network drops, API timeouts, and OpenAI/Tavily rate limits, preventing pipeline collapse during high-concurrency map-reduce phases.
 *   **Hierarchical State Management:** Sub-graphs maintain isolated local states. This prevents the compounding state bloat that typically plagues complex LangGraph applications.
 
@@ -116,7 +121,7 @@ uv run --active langgraph dev
 - **Warnings:** If anyone is running this kind of project for first time then I would definitely try to ignore the pydantic deserializing warning initially since it is just a deserialzing issue when we recieve an empty/none value in state where we have define a strict schema.
 
 ## Future Directions
-* **Adversarial Multi-Agent Verification (Agentic GANs):** Introduce a dedicated adversarial "Critic" node. Instead of linear synthesis, the Analyst (Generator) and Critic (Discriminator) will engage in a closed-loop debate. Claims that fail the Critic's stress test are dropped before reaching the global compiler, theoretically driving hallucination rates to zero.
+* **Adversarial Multi-Agent Verification:** Introduce a dedicated adversarial "Critic" node. Instead of linear synthesis, the Analyst (Generator) and Critic (Discriminator) will engage in a closed-loop debate. Claims that fail the Critic's stress test are dropped before reaching the global compiler, aiming to reduce hallucinations to a good extent.
 
 * **Targeted Code Refinement (Diff/Patch):** Currently, the self-healing loop feeds the entire .tex document back to the model. Transitioning to a diff-based patching system could save up to 15,000 tokens per loop.
 
@@ -130,7 +135,7 @@ uv run --active langgraph dev
 
 * **De-duplication issue:** Since every interview session generates a unique ID, transitioning the global state from a simple list to a key-value dictionary (mapped by interview ID) would act as a natural deduplication filter. Alternatively, inserting a lightweight, programmatic validation node immediately before compilation could parse these IDs and prune duplicate context, saving the LLM from wasting reasoning tokens on redundant data.
 
-* **Containerized LaTeX Runtime:** Package `pdflatex` and environment dependencies into a minimal Docker container to eliminate host-level setup and guarantee 100% cross-platform reproducibility.
+* **Containerized LaTeX Runtime:** Package `pdflatex` and environment dependencies into a minimal Docker container to eliminate host-level setup and improving reproducibility across platforms.
 
 ## Acknowledgments:
 * I took some refereneces for schema design from the langgraph foundational course.
@@ -138,8 +143,17 @@ uv run --active langgraph dev
 * **Additonal AI usage includes:** In refining the compilation node as well -> my approach was to use pydantic base model but output were getting noisy so Gemini 2.5 Flash(extended thinking) recommended using a raw output and suggested to parse it accordingly.
 * **Additonal AI usage includes:** In structuring the README and proper proper presentation of the project I have taken assistance of Gemini 2.5 Flash(extended thinking).
 
-`This project focuses on engineering patterns for agentic systems rather than building a production-ready research platform. Many design decisions were made to explore reliability, debugging, and workflow control within a limited development timeframe. (20 days)`
+This project focuses on engineering patterns for agentic systems rather than building a production-ready research platform. Many design decisions were made to explore reliability, debugging, and workflow control within a limited development timeframe. (20 days)
 
-`Hi, at time of developing this project I am a student at uppsala university of graduating in 2027, my name is Garveet Jain and here are my credentials:
-linkedin: www.linkedin.com/in/garveetjain/ 
-github: https://github.com/Jaingarveet`
+## Author
+
+**Garveet Jain**
+
+M.Sc. Machine Learning and Statistics
+Uppsala University (Expected graduation: 2027)
+
+LinkedIn:
+https://www.linkedin.com/in/garveetjain/
+
+GitHub:
+https://github.com/Jaingarveet
