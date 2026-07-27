@@ -9,7 +9,7 @@ A hierarchical, multi-agent research pipeline built with [LangGraph](https://pyt
 ![OpenAI](https://img.shields.io/badge/OpenAI-gpt--5--nano-412991)
 ![License](https://img.shields.io/badge/License-Apache%202.0-green)
 
-**KEYWORDS:**  parallel sub-graphs, self-healing loop, human-in-the loop checkpoints, dynamic summarization middleware, retry policies, audience modelling, conditional re-routing and web_search funcitonality.
+**KEYWORDS:**  parallel sub-graphs, self-healing loop, human-in-the loop checkpoints, dynamic summarization middleware, retry policies, audience modelling, conditional re-routing and web_search functionality.
 
 <p align="center">
   <img width="1117" height="1408" alt="image" src="https://github.com/user-attachments/assets/5fea1390-d077-4b49-bd3a-325ffd5a77d5" />
@@ -140,8 +140,9 @@ uv run --active langgraph dev
 ## Acknowledgments:
 * I took some refereneces for schema design from the langgraph foundational course.
 * **Note on AI Usage:** I designed the workflow and state graphs for this project myself, but I used Gemini 2.5 Flash(extended thinking) as a pairing partner to iron out some Bash script edge cases and clean up the Python string extraction logic.
-* **Additonal AI usage includes:** In refining the compilation node as well -> my approach was to use pydantic base model but output were getting noisy so Gemini 2.5 Flash(extended thinking) recommended using a raw output and suggested to parse it accordingly.
-* **Additonal AI usage includes:** In structuring the README and proper proper presentation of the project I have taken assistance of Gemini 2.5 Flash(extended thinking).
+* **Additonal AI usage:** In refining the compilation node as well -> my approach was to use pydantic base model but output were getting noisy so Gemini 2.5 Flash(extended thinking) recommended using a raw output and suggested to parse it accordingly.
+* **Additonal AI usage:** In structuring the README and proper proper presentation of the project I have taken assistance of Gemini 2.5 Flash(extended thinking).
+* **Additonal AI usage:** In structuring the CITATION.cff file.
 
 This project focuses on engineering patterns for agentic systems rather than building a production-ready research platform. Many design decisions were made to explore reliability, debugging, and workflow control within a limited development timeframe. (20 days)
 
