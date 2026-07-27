@@ -1,0 +1,36 @@
+cff-version: 1.2.0
+title: "Agentic_Research_Team"
+message: >
+  If you use this repository in academic work, research, or
+  engineering projects, please cite it using the metadata below.
+
+type: software
+
+authors:
+  - family-names: Jain
+    given-names: Garveet
+
+repository-code: "https://github.com/Jaingarveet/Agentic_Research_Team"
+
+license: Apache-2.0
+
+abstract: >
+  A hierarchical, multi-agent research pipeline built with LangGraph
+  that dynamically provisions parallel AI analysts, performs
+  simulated expert interviews, compiles technical reports, validates
+  LaTeX through a self-healing compilation loop, and deterministically
+  commits the final paper to Overleaf.
+
+keywords:
+  - LangGraph
+  - Multi-Agent Systems
+  - LLM
+  - AI Platform Engineering
+  - Agentic AI
+  - Workflow Orchestration
+  - Research Automation
+  - LaTeX
+  - Overleaf
+  - State Machines
+
+url: "https://github.com/Jaingarveet/Agentic_Research_Team"
