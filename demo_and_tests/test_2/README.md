@@ -2,7 +2,7 @@
 
 This directory contains artifacts and screenshots from the second successful execution of the Agentic Research Team pipeline.
 
-### user input: 
+### User Input: 
 `Research Topic: Enterprise Adoption of AI Coding Assistants (GitHub Copilot, Cursor, Claude Code, Windsurf, Amazon Q, ChatGPT).
 Target Audience: Engineering Leadership, Staff Engineers, Software Architects, and Technology Decision Makers.
 Independently research the topic, interview knowledgeable practitioners, synthesise the evidence, and produce a detailed technical report including trends, trade-offs, and recommendations.`
