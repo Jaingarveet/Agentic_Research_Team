@@ -1,3 +1,9 @@
+
+<img width="891" height="641" alt="state and final sources" src="https://github.com/user-attachments/assets/abe0f6b3-40da-4b53-9390-56bed6c9328a" />
+<img width="714" height="450" alt="Pre interview trace" src="https://github.com/user-attachments/assets/1bd4df04-24df-49ba-8496-5a1f2ca972f3" />
+<img width="1273" height="821" alt="Normal trace" src="https://github.com/user-attachments/assets/e0849b8a-61a4-4432-ac3c-375a0fdcad3e" />
+<img width="714" height="703" alt="Interview trace" src="https://github.com/user-attachments/assets/03a616aa-6fab-4eeb-a4bd-1dee7da07cbb" />
+<img width="1279" height="829" alt="Full graph" src="https://github.com/user-attachments/assets/f73d5f70-5c18-40a2-b20f-fb61b7505f0b" />
 # Run Results & Execution Trace
 
 This directory contains artifacts and screenshots from the second successful execution of the Agentic Research Team pipeline.
@@ -24,7 +30,6 @@ Key observations:
 - Conditional routing
 - Compilation and validation stages
 
-<img width="774" height="864" alt="trace" src="https://github.com/user-attachments/assets/dcbe7d75-65ca-4dd1-b621-6101bf043d6f" />
 
 ---
 
@@ -37,9 +42,6 @@ The states demonstrate:
 - Context accumulation
 - State merging
 
-<img width="777" height="856" alt="structure audience" src="https://github.com/user-attachments/assets/faa36caf-9c27-4f13-81e1-96bd090820b5" />
-
-<img width="1228" height="864" alt="start input" src="https://github.com/user-attachments/assets/ac3530cd-2180-4399-ad61-da0d06bc1362" />
 
 ---
 
@@ -53,7 +55,6 @@ This run demonstrates:
 - Parallel web research workflows
 - Aggregation of results after completion
 
-<img width="764" height="869" alt="parallel" src="https://github.com/user-attachments/assets/14ff6693-7824-458f-9587-f119dcb9c2eb" />
 
 ---
 
@@ -69,8 +70,6 @@ If compilation fails:
 
 The screenshot below shows the validation loop successfully detecting and resolving compilation issues.
 
-
-<img width="658" height="865" alt="self healing" src="https://github.com/user-attachments/assets/87ce58d0-e02e-43b9-ac29-b9d0909c0f75" />
 
 
 ---
