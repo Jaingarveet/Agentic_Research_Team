@@ -26,6 +26,9 @@ A hierarchical, multi-agent research pipeline built with [LangGraph](https://pyt
 **NOTE ON TEST RESULTS & DEMOS:** 
 Check out the `demo_and_tests/` directory for full execution logs, generated markdown files, and compiled PDFs across various test settings. Notice that the raw generated body text is 100% unique and sequentially structured; any section repetition occurs exclusively inside the final LaTeX compilation artifacts due to full-file code regeneration. Video demonstration: [YouTube Execution Run](https://youtu.be/3aU622zTymY).
 
+**💡 Note on Model Capacity (`gpt-5-nano`) & LaTeX Generation:**  
+The entire pipeline was benchmarked strictly using **`gpt-5-nano`** to evaluate nano-scale model capabilities on complex multi-agent orchestration. While `gpt-5-nano` successfully produces rich, highly structured domain analysis, lightweight models remain sensitive to long-context LaTeX syntax serialization. Any downstream PDF issues (such as math-mode escapes, truncations, or section duplication during file regeneration) are strictly isolated to the typesetting layer and do not reflect failures in the core reasoning or content generation logic.
+
 ## Architecture & Workflow
 
 The architecture splits into a **parent graph** concerned with orchestration and compilation of the research and multiple parallel **sub-graphs** concerned with targeted research.
