@@ -1,46 +1,59 @@
-
-<img width="891" height="641" alt="state and final sources" src="https://github.com/user-attachments/assets/abe0f6b3-40da-4b53-9390-56bed6c9328a" />
-<img width="714" height="450" alt="Pre interview trace" src="https://github.com/user-attachments/assets/1bd4df04-24df-49ba-8496-5a1f2ca972f3" />
-<img width="1273" height="821" alt="Normal trace" src="https://github.com/user-attachments/assets/e0849b8a-61a4-4432-ac3c-375a0fdcad3e" />
-<img width="714" height="703" alt="Interview trace" src="https://github.com/user-attachments/assets/03a616aa-6fab-4eeb-a4bd-1dee7da07cbb" />
-<img width="1279" height="829" alt="Full graph" src="https://github.com/user-attachments/assets/f73d5f70-5c18-40a2-b20f-fb61b7505f0b" />
 # Run Results & Execution Trace
 
 This directory contains artifacts and screenshots from the second successful execution of the Agentic Research Team pipeline.
 
-`INPUT TOPIC: Quantum Computing in Cryptography: Post-Quantum Migration Strategies, Risk Assessment, and Enterprise Preparedness for Critical Infrastructure`
+### user input: 
+`Research Topic: Enterprise Adoption of AI Coding Assistants (GitHub Copilot, Cursor, Claude Code, Windsurf, Amazon Q, ChatGPT).
+Target Audience: Engineering Leadership, Staff Engineers, Software Architects, and Technology Decision Makers.
+Independently research the topic, interview knowledgeable practitioners, synthesise the evidence, and produce a detailed technical report including trends, trade-offs, and recommendations.`
 
-The run demonstrates:
-- Dynamic analyst generation
-- Parallel multi-agent research execution
-- LangGraph state management and reducers
-- Expert interview workflows
-- LaTeX generation and self-healing validation
-- Final report compilation pipeline
+## Key techincal highlights for this run: 
+
+* **End-to-End Pipeline Visualization & Token Metrics:** Demonstrates the full LangGraph lifecycle—from prompt structuring and dynamic analyst generation (gpt-5-nano) to HITL checkpoints, content compilation, and the self-healing LaTeX validation loop. Total execution costs remain under $0.09 across 430k+ tokens.
+
+* **Parallel Sub-Graph Interview Loop:** Illustrates the map-reduce architecture in action, spawning 4 dynamic conduct_interviews sub-graphs simultaneously. Each sub-node executes a cyclic workflow: analyst question generation $\rightarrow$ search query optimization $\rightarrow$ web search $\rightarrow$ grounded expert response.
+* **State Checkpoints & Source Quality Ranking:** Showcases state state-reduction and checkpoint inspection, aggregating interview outputs into global state (final_draft_sources) while explicitly scoring retrieved web context (e.g., Good ranking) for weighted compilation downstream.
+
+
+
+## Key Highlights from the output:
+
+* **Executive AI Assistant Governance Framework:** Evaluates six enterprise coding assistants (GitHub Copilot, Cursor, Claude Code, Windsurf, Amazon Q, and ChatGPT) with actionable policy and risk blueprints for CIOs, CTOs, and CISOs.  
+
+* **SDLC Policy Integration & Technical Controls:** Details concrete guardrails for CI/CD pipelines, data lineage tracing, model versioning, environment isolation, 
+and continuous auditing across multi-cloud and hybrid deployments.  
+
+* **Regulatory & Compliance Mapping:** Maps enterprise controls to major legal frameworks including GDPR, CCPA, and SOX to ensure data minimization, access control, and continuous audit readiness.
+
+* **Phased Rollout & 2-Year ROI Model:** Outlines a 90-day pilot and 180-day production-staging roadmap backed by a 24-month ROI model to evaluate seat licensing, developer time saved, and defect reduction.  
+
+* **Compilation Artifact Example:** Demonstrates self-healing compilation limits on long documents—showing math-mode escapes (e.g., $CI/CD$), mid-sentence truncation in Section 2.17, and a duplicated closing section (Section 2.19 vs. Section 3).
+
+
 
 ---
 
 ## 1. LangGraph Execution Trace
 
-The following trace shows the complete workflow execution across the parent graph and parallel research subgraphs.
+The following images show the trace for the run in compressed format.
+- **Total cost spent:** 433.5K tokens / $0.0821
+- **Total execution time:** 514.92s
 
-Key observations:
-- Parent graph orchestration
-- Parallel analyst execution
-- Conditional routing
-- Compilation and validation stages
+<img width="714" height="450" alt="Pre interview trace" src="https://github.com/user-attachments/assets/1bd4df04-24df-49ba-8496-5a1f2ca972f3" />
 
+<img width="1273" height="821" alt="Normal trace" src="https://github.com/user-attachments/assets/e0849b8a-61a4-4432-ac3c-375a0fdcad3e" />
+
+<img width="714" height="703" alt="Interview trace" src="https://github.com/user-attachments/assets/03a616aa-6fab-4eeb-a4bd-1dee7da07cbb" />
 
 ---
 
 ## 2. State Management Examples
 
-Examples of intermediate audience schema generated during execution.
-
 The states demonstrate:
-- input_structuring node output
 - Context accumulation
 - State merging
+
+<img width="891" height="641" alt="state and final sources" src="https://github.com/user-attachments/assets/abe0f6b3-40da-4b53-9390-56bed6c9328a" />
 
 
 ---
@@ -50,32 +63,12 @@ The states demonstrate:
 The pipeline dynamically provisions multiple analyst subgraphs which execute concurrently.
 
 This run demonstrates:
-- Independent domain-specific analysts
 - Concurrent expert interviews
 - Parallel web research workflows
 - Aggregation of results after completion
 
+<img width="1279" height="829" alt="Full graph" src="https://github.com/user-attachments/assets/f73d5f70-5c18-40a2-b20f-fb61b7505f0b" />
 
 ---
-
-## 4. LaTeX Self-Healing Validation Loop
-
-The generated LaTeX document is automatically compiled locally using `pdflatex`.
-
-If compilation fails:
-1. Error logs are extracted
-2. Relevant failure information is passed back to the LLM
-3. The LaTeX code is repaired
-4. Compilation is retried
-
-The screenshot below shows the validation loop successfully detecting and resolving compilation issues.
-
-
-
----
-
-## 5. Generated Output
-
-The final generated technical report from this run can be found as output_2 in test_2
 
 
