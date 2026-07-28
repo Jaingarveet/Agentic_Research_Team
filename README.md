@@ -53,8 +53,8 @@ The architecture splits into a **parent graph** concerned with orchestration and
 
 ## Key Technical Highlights
 
-*   **Average Completion Time:** ~10 minutes `(depending on user response time, the number of HITL revision cycles, and any LaTeX refinement iterations).`
-*   **Average Cost / Token Efficiency:** $0.085 /350-400k tokens per run `Entire pipeline executed using gpt-5-nano.`
+*   **Average Completion Time:** ~10-12 minutes `(depending on user response time, the number of HITL revision cycles, and any LaTeX refinement iterations).`
+*   **Average Cost / Token Efficiency:** $0.085 - 0.1 /350-450k tokens per run `Entire pipeline executed using gpt-5-nano.`
 *    **Map-Reduce Architecture:** Utilizes LangGraph's `Send` API to dynamically spawn an arbitrary number of domain-specific analysts that operate completely in parallel.
 *   **Self-Healing Code Compilation:** Automated conditional routing checks LaTeX compilation logs, filtering out raw stdout noise to feed the LLM isolated failure lines—reducing reasoning token usage.
 *   **Robust Retry Policies:** Custom retry handlers tailored exclusively for network drops, API timeouts, and OpenAI/Tavily rate limits, preventing pipeline collapse during high-concurrency map-reduce phases.
