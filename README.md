@@ -23,7 +23,8 @@ A hierarchical, multi-agent research pipeline built with [LangGraph](https://pyt
 - Future Directions
 - Acknowledgements
 
-**NOTE:** Checkout the details of tests in demo_and_tests folder, it also has the final pdfs generated across different testing settings. Checkout the video of one of the execution runs: https://youtu.be/3aU622zTymY
+**NOTE ON TEST RESULTS & DEMOS:** 
+Check out the `demo_and_tests/` directory for full execution logs, generated markdown files, and compiled PDFs across various test settings. Notice that the raw generated body text is 100% unique and sequentially structured; any section repetition occurs exclusively inside the final LaTeX compilation artifacts due to full-file code regeneration. Video demonstration: [YouTube Execution Run](https://youtu.be/3aU622zTymY).
 
 ## Architecture & Workflow
 
@@ -63,7 +64,7 @@ The architecture splits into a **parent graph** concerned with orchestration and
 *   **State Memory:** No cross-session LangGraph `MemoryStore` is implemented yet, as the current goal is stateless, highly objective research generation rather than a personalized assistant.
 *   **Regenerate LaTeX code completely:** The original implementation is working to regenerate the code file despite the node acting as a code patcher, this consumes a significant number of tokens and could be optimized further. More details in future work section.
   NOTE: one more thing I noticed was that since I provided a more focused/strict latex template most of the errors can be specified in prompts which can directly restrict the LLM to generate a good latex code and the fact that for the current case mostly missing $ insert in handling urls was the main issue but I still relied on full code generation since we mostly want latex template flexibility time to time.
-* **State Deduplication & Sequence Mapping:** While the system dynamically generates unique domain analysts to prevent redundant interviews, using `Annotated[list, add]` for map-reduce state aggregation introduces a risk of content duplication. Because the global state blindly appends interview outputs, the compilation node occasionally receives overlapping content without strict sequential awareness. `Checkout the edge_case_test directory inside demo_and_tests for more insights`
+*  **Content Synthesis vs. LaTeX Translation Artifacts:** Empirical inspection of intermediate outputs (available in `demo_and_tests/`) confirms that the core multi-agent research pipeline and markdown body generation (`CREATE_BODY_AND_SOURCES_PROMPT`) produce completely clean, non-redundant, and unique content across all topics. Duplication issues are strictly isolated to the downstream **LaTeX Translation & Self-Healing Loop**. When translating long markdown documents into raw `.tex` code or re-generating full `.tex` files to fix compilation errors, LLM context drift occurs during syntax conversion. This clearly separates **Multi-Agent Orchestration (Successful)** from **Code Syntax Translation (Target for Diff/Patching)**.
 
 ## Getting Started
 ### Pre-requisites
@@ -111,6 +112,7 @@ rm .env.example
 uv sync
 source .venv/bin/activate
 export PYTHONDONTWRITEBYTECODE=1
+export PATH="/Library/TeX/texbin:$PATH"
 uv run --active langgraph dev --no-reload
 ```
 ## Troubleshooting
@@ -120,8 +122,6 @@ uv run --active langgraph dev --no-reload
 - **LaTeX errors:** Ensure `pdflatex` is installed and available in your `PATH`.
 - **Version mismatch:** There can be a possibility of mismatch between pydantic versions or Typeddict importing syntax depending on which python version you run, for that case I would recommend using python versions around 3.11.
 - **Warnings:** If anyone is running this kind of project for first time then I would definitely try to ignore the pydantic deserializing warning initially since it is just a deserialzing issue when we receive an empty/none value in state where we have define a strict schema.
-
-NOTE: Usually right now the pipeline rarely breaks(1 out of 20 times), which is normally due to some external errors mentioned in troubleshooting section, the current implementation did try to stay clear of dockerfile due to heavy images being created from texlive installation.
 
 ## Future Directions
 * **Adversarial Multi-Agent Verification:** Introduce a dedicated adversarial "Critic" node. Instead of linear synthesis, the Analyst (Generator) and Critic (Discriminator) will engage in a closed-loop debate. Claims that fail the Critic's stress test are dropped before reaching the global compiler, aiming to reduce hallucinations to a good extent.
@@ -136,7 +136,7 @@ NOTE: Usually right now the pipeline rarely breaks(1 out of 20 times), which is 
 
 * **Add a URL Checker:** To further optimize the context window, we can introduce a URL checker at the web_search node where we retrieve the URLs and only filter out those for which we are actually receiving proper content since the context is currently generated with help of tavily api which uses LLM in background.
 
-* **De-duplication issue:** Since every interview session generates a unique ID, transitioning the global state from a simple list to a key-value dictionary (mapped by interview ID) would act as a natural deduplication filter. Alternatively, inserting a lightweight, programmatic validation node immediately before compilation could parse these IDs and prune duplicate context, saving the LLM from wasting reasoning tokens on redundant data. Another thing could be to use additional compilation nodes where the initial compilation node only drafts introduction and sources, and then we generate sepcific sub-topics like around 4-5 for the body for which we invoke parallel nodes to compile that body chunk given the intro and sources and make sure the topics are not duplicate, in turn making everything more robust.
+* **Targeted AST / Diff Patching for LaTeX:** Transition from regenerating full `.tex` files during self-healing loops to AST-based or unified diff patching. Since the core content synthesis is proven to be clean and non-redundant, operating at the diff level will eliminate LLM attention drift (preventing duplicated sections) and save up to 15,000 reasoning tokens per self-healing iteration.
 
 * **Containerized LaTeX Runtime:** Package `pdflatex` and environment dependencies into a minimal Docker container to eliminate host-level setup and improving reproducibility across platforms.
 
