@@ -110,7 +110,8 @@ rm .env.example
 ```bash
 uv sync
 source .venv/bin/activate
-uv run --active langgraph dev
+export PYTHONDONTWRITEBYTECODE=1
+uv run --active langgraph dev --no-reload
 ```
 ## Troubleshooting
 
@@ -118,7 +119,9 @@ uv run --active langgraph dev
 - **Overleaf sync issues:** Verify your Git integration token and the project ID configured in `scripts/`.
 - **LaTeX errors:** Ensure `pdflatex` is installed and available in your `PATH`.
 - **Version mismatch:** There can be a possibility of mismatch between pydantic versions or Typeddict importing syntax depending on which python version you run, for that case I would recommend using python versions around 3.11.
-- **Warnings:** If anyone is running this kind of project for first time then I would definitely try to ignore the pydantic deserializing warning initially since it is just a deserialzing issue when we recieve an empty/none value in state where we have define a strict schema.
+- **Warnings:** If anyone is running this kind of project for first time then I would definitely try to ignore the pydantic deserializing warning initially since it is just a deserialzing issue when we receive an empty/none value in state where we have define a strict schema.
+
+NOTE: Usually right now the pipeline rarely breaks(1 out of 20 times), which is normally due to some external errors mentioned in troubleshooting section, the current implementation did try to stay clear of dockerfile due to heavy images being created from texlive installation. Look below in future works.
 
 ## Future Directions
 * **Adversarial Multi-Agent Verification:** Introduce a dedicated adversarial "Critic" node. Instead of linear synthesis, the Analyst (Generator) and Critic (Discriminator) will engage in a closed-loop debate. Claims that fail the Critic's stress test are dropped before reaching the global compiler, aiming to reduce hallucinations to a good extent.
