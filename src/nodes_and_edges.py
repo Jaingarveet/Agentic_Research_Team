@@ -196,7 +196,7 @@ def generate_and_ask_question(state: SingleInterviewState) -> dict[str,Any]:
         response = model.with_structured_output(Question_Structure, method = 'json_schema', strict = True).invoke(invokation_message)
         
         return {'current_question': response.question, # to get rid of pydantic serialization issues
-               'conversation_history': Overwrite([updated_conversation_history] + [response['question']]),
+               'conversation_history': Overwrite([updated_conversation_history] + [response.question]),
                 # Need to overwrite the state if we want to update it with summary and remove previous history
                'number_of_turns': num_turns} 
         
@@ -417,7 +417,7 @@ def content_compiler(state: UserSideInput) -> dict[str,Any]:
         'final_draft_sources': sources_list
     }
 
-def latex_compiler(state: UserSideInput) -> dict[str,[]]:
+def latex_compiler(state: UserSideInput) -> dict[str,list]:
     
     """ Latex compiling node that compiles the already existing intro,body and sources into a .tex code format to make it runnable on 
         overleaf. 
