@@ -11,32 +11,36 @@ This directory contains artifacts and screenshots from the execution of the Agen
 
 ## Key technical highlights for this run: 
 
-* **End-to-End Pipeline Visualization & Token Metrics:** Demonstrates the full LangGraph lifecycle—from prompt structuring and dynamic analyst generation (`gpt-5-nano`) to HITL checkpoints, content compilation, and LaTeX validation[cite: 5]. Total execution cost remained under $0.07 across 339k+ tokens[cite: 5].
+* **End-to-End Pipeline Visualization & Token Metrics:** Demonstrates the full LangGraph lifecycle—from prompt structuring and dynamic analyst generation (`gpt-5-nano`) to HITL checkpoints, content compilation, and LaTeX validation . Total execution cost remained under $0.07 across 339k+ tokens .
 
-* **Parallel Sub-Graph Interview Loop:** Illustrates the map-reduce architecture in action, spawning dynamic `conduct_interviews` sub-graphs simultaneously across four clinical domains[cite: 5]. Each sub-node executes an iterative workflow: analyst question generation $\rightarrow$ search query optimization $\rightarrow$ web search $\rightarrow$ grounded expert response[cite: 5].
+* **Parallel Sub-Graph Interview Loop:** Illustrates the map-reduce architecture in action, spawning dynamic `conduct_interviews` sub-graphs simultaneously across four clinical domains . Each sub-node executes an iterative workflow: analyst question generation $\rightarrow$ search query optimization $\rightarrow$ web search $\rightarrow$ grounded expert response .
 
-* **State Checkpoints & Source Quality Ranking:** Showcases state reduction and checkpoint inspection, aggregating domain interview outputs into global state (`final_draft_sources`, `interviewers`, `conversation_history_all_agents`)[cite: 5].
+* **State Checkpoints & Source Quality Ranking:** Showcases state reduction and checkpoint inspection, aggregating domain interview outputs into global state (`final_draft_sources`, `interviewers`, `conversation_history_all_agents`) .
 
 ## Key Highlights from the output:
 
-* **Multi-Regional Governance Framework:** Establishes operational blueprints for LLM deployment across US (FDA pathways), UK (MHRA), and EU (GDPR/EMA) regulatory environments[cite: 5]
+* **Multi-Regional Governance Framework:** Establishes operational blueprints for LLM deployment across US (FDA pathways), UK (MHRA), and EU (GDPR/EMA) regulatory environments 
 .
 
-* **Containment-by-Design Privacy Architecture:** Details edge de-identification, PHI tokenization, and synthetic data boundaries for clinical documentation stacks[cite: 5].
+* **Containment-by-Design Privacy Architecture:** Details edge de-identification, PHI tokenization, and synthetic data boundaries for clinical documentation stacks .
 
-* **Operationalized Risk & Clinical Metrics:** Balances documentation time savings and imaging workflow acceleration against hallucination controls, bias audits, and HITL escalation playbooks[cite: 5].
+* **Operationalized Risk & Clinical Metrics:** Balances documentation time savings and imaging workflow acceleration against hallucination controls, bias audits, and HITL escalation playbooks .
 
-* **12-Month Hospital Implementation Plan:** Features a 4-phase rollout blueprint (Foundation, Contract Execution, Production Pilot, Scale-up) with concrete RACI ownership and evidence artifacts[cite: 5].
+* **12-Month Hospital Implementation Plan:** Features a 4-phase rollout blueprint (Foundation, Contract Execution, Production Pilot, Scale-up) with concrete RACI ownership and evidence artifacts .
 
-* **Compilation Artifact Example:** Demonstrates self-healing compilation limits—showing raw layout section numbering artifacts (e.g., `21) Data flows...`)[cite: 5], unresolved reference keys (`[?]`)[cite: 5], and duplicated case study sections (Section 7 vs. Section 10)[cite: 5].
+* **Compilation Artifact Example:** Demonstrates self-healing compilation limits—showing raw layout section numbering artifacts (e.g., `21) Data flows...`) , unresolved reference keys (`[?]`) , and duplicated case study sections (Section 7 vs. Section 10) .
 
 ---
 
 ## 1. LangGraph Execution Trace
 
 The following images show the trace for the run in compressed format.
-- **Total cost spent:** 339.4K tokens / $0.0644[cite: 5]
-- **Total execution time:** 558.85s[cite: 5]
+- **Total cost spent:** 339.4K tokens / $0.0644
+- **Total execution time:** 558.85s
+
+<img width="1362" height="827" alt="Full trace" src="https://github.com/user-attachments/assets/3ed6d590-23b7-4029-96c6-56412a52d75c" />
+
+<img width="467" height="824" alt="interview trace" src="https://github.com/user-attachments/assets/b14b6527-cb86-40d3-8186-040bc4ecf1e8" />
 
 ---
 
@@ -44,29 +48,20 @@ The following images show the trace for the run in compressed format.
 
 The states demonstrate:
 - Context accumulation
-- State checkpoint inspection & source merging[cite: 5]
+- State checkpoint inspection & source merging 
 
+<img width="1264" height="827" alt="State" src="https://github.com/user-attachments/assets/563fe700-0a47-42ba-9cb2-4b7bd99aae3f" />
 
 ---
 
 ## 3. Parallel Research Execution
 
-The pipeline dynamically provisions multiple analyst subgraphs which execute concurrently[cite: 5].
+The pipeline dynamically provisions multiple analyst subgraphs which execute concurrently .
 
 This run demonstrates:
-- Concurrent expert interviews across healthcare domains[cite: 5]
-- Parallel web research workflows[cite: 5]
-- Aggregation of results after completion[cite: 5]
+- Concurrent expert interviews across healthcare domains 
+- Parallel web research workflows 
+- Aggregation of results after completion
 
-## 4. LaTeX Self-Healing Validation Loop
-
-The generated LaTeX document is automatically compiled locally using `pdflatex`.
-
-If compilation fails:
-1. Error logs are extracted
-2. Relevant failure information is passed back to the LLM
-3. The LaTeX code is repaired
-4. Compilation is retried
-
-The screenshot below shows the validation loop successfully detecting and resolving compilation issues.
+<img width="1247" height="824" alt="Full graph" src="https://github.com/user-attachments/assets/36ed333a-f399-46be-afe2-4dabdf920ba2" />
 
