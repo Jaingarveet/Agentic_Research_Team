@@ -144,8 +144,8 @@ uv run --active langgraph dev --no-reload
 * **Containerized LaTeX Runtime:** Package `pdflatex` and environment dependencies into a minimal Docker container to eliminate host-level setup and improving reproducibility across platforms.
 
 ## Acknowledgments:
-* I took some references for schema design from the langgraph foundational course.
-* **Note on AI Usage:** I designed the workflow and state graphs for this project myself, but I used Gemini 2.5 Flash(extended thinking) as a pairing partner to iron out some Bash script edge cases and clean up the Python string extraction logic.
+* I took some references for schema design of analysts from the langgraph foundational course.
+* **Note on AI Usage:** I designed the workflow and state graphs for this project myself, and I used Gemini 2.5 Flash(extended thinking) as a pairing partner to iron out some Bash script edge cases (starting 4 lines) and clean up the Python string extraction logic(in latex compilation node for sanitizing meta information from llm response inside latex code).
 * **Additonal AI usage:** In refining the compilation node as well -> my approach was to use pydantic base model but output were getting noisy so Gemini 2.5 Flash(extended thinking) recommended using a raw output and suggested to parse it accordingly.
 * **Additonal AI usage:** In structuring the README and proper presentation of the project I have taken assistance of Gemini 2.5 Flash(extended thinking).
 * **Additonal AI usage:** In structuring the CITATION.cff file.
