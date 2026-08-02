@@ -4,10 +4,17 @@ A hierarchical, multi-agent research pipeline built with [LangGraph](https://pyt
 
 **My main motivation for this project was to do a case study in AI Platform Engineering and an attempt to make agentic workflows as deterministic as possible with minimal user interaction. The goal was not to create a fully autonomous research system, but to experiment with designing controllable, modular, and fault-tolerant LLM pipelines with minimal user intervention.**
 
-![Python](https://img.shields.io/badge/Python-3.11-blue)
-![LangGraph](https://img.shields.io/badge/LangGraph-Orchestration-success)
-![OpenAI](https://img.shields.io/badge/OpenAI-gpt--5--nano-412991)
-![License](https://img.shields.io/badge/License-Apache%202.0-green)
+
+#### Tech Stack
+
+[![LangGraph](https://img.shields.io/badge/Orchestration-LangGraph-success)](https://www.langchain.com/langgraph)
+[![gpt-5-nano](https://img.shields.io/badge/LLM-gpt--5--nano-412991?logo=openai)](https://openai.com)
+[![gpt-4o-mini](https://img.shields.io/badge/LLM-gpt--4o--mini-412991?logo=openai)](https://openai.com)
+[![Tavily](https://img.shields.io/badge/Search-Tavily%20API-00B4B6)](https://tavily.com)
+[![Pydantic](https://img.shields.io/badge/Validation-Pydantic-e92063?logo=pydantic&logoColor=white)](https://docs.pydantic.dev/)
+[![uv](https://img.shields.io/badge/Environment-uv-purple)](https://github.com/astral-sh/uv)
+[![pdflatex](https://img.shields.io/badge/Compilation-pdflatex%20(Local)-3D6117?logo=latex&logoColor=white)](https://www.tug.org/applications/pdftex/)
+[![Overleaf](https://img.shields.io/badge/Integration-Overleaf-47A141?logo=overleaf&logoColor=white)](https://www.overleaf.com/)
 
 **KEYWORDS:**  parallel sub-graphs, self-healing loop, human-in-the loop checkpoints, dynamic summarization middleware, retry policies, audience modelling, conditional re-routing and web_search functionality.
 
