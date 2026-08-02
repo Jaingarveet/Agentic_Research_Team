@@ -4,7 +4,6 @@ A hierarchical, multi-agent research pipeline built with [LangGraph](https://pyt
 
 **My main motivation for this project was to do a case study in AI Platform Engineering and an attempt to make agentic workflows as deterministic as possible with minimal user interaction. The goal was not to create a fully autonomous research system, but to experiment with designing controllable, modular, and fault-tolerant LLM pipelines with minimal user intervention.**
 
-
 #### Tech Stack
 
 [![LangGraph](https://img.shields.io/badge/Orchestration-LangGraph-success)](https://www.langchain.com/langgraph)
@@ -15,6 +14,9 @@ A hierarchical, multi-agent research pipeline built with [LangGraph](https://pyt
 [![uv](https://img.shields.io/badge/Environment-uv-purple)](https://github.com/astral-sh/uv)
 [![pdflatex](https://img.shields.io/badge/Compilation-pdflatex%20(Local)-3D6117?logo=latex&logoColor=white)](https://www.tug.org/applications/pdftex/)
 [![Overleaf](https://img.shields.io/badge/Integration-Overleaf-47A141?logo=overleaf&logoColor=white)](https://www.overleaf.com/)
+[![Bash](https://img.shields.io/badge/Scripting-Bash-4EAA25?logo=gnu-bash&logoColor=white)](https://www.gnu.org/software/bash/)
+[![Git](https://img.shields.io/badge/Version%20Control-Git-F05032?logo=git&logoColor=white)](https://git-scm.com/)
+[![LangSmith](https://img.shields.io/badge/Development-LangSmith-0072C6)](https://smith.langchain.com/)
 
 **KEYWORDS:**  parallel sub-graphs, self-healing loop, human-in-the loop checkpoints, dynamic summarization middleware, retry policies, audience modelling, conditional re-routing and web_search functionality.
 
