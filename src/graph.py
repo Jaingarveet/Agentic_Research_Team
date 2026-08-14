@@ -24,7 +24,7 @@ LLM_nodes_retry_policy = RetryPolicy(
     backoff_factor = 2.0,
     max_attempts = 3,
     max_interval = 128,
-    jitter = False, # no need to add random variations in retries since no parallel nodes are retrying at same time
+    jitter = True, 
     retry_on = LLM_retry_error_filter
 )
 
@@ -33,7 +33,7 @@ Tavily_search_node_retry_policy= RetryPolicy(
     backoff_factor = 2.0,
     max_attempts = 3,
     max_interval = 128,
-    jitter = False, 
+    jitter = True, 
     retry_on = Tavily_retry_error_filter
 )
 
